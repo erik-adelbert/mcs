@@ -1,0 +1,21 @@
+20 10 1
+Y----YYYY-
+Y----Y----
+Y----YYYYY
+Y-----YBBY
+Y--Y--YBBY
+YYYY--YYYY
+-Y-Y--Y--Y
+-Y--BBBB-Y
+YYY--B-B-Y
+--YY--BBYY
+---Y-BB-Y-
+--YYY---Y-
+---Y----YY
+---Y-----Y
+---YY---YY
+----Y---Y-
+----Y---Y-
+----Y---Y-
+----YYYYY-
+----Y---Y-
