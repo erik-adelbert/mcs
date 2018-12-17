@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"strconv"
 	"strings"
@@ -22,27 +23,53 @@ import (
 )
 
 const (
-	timeout = 1 * time.Minute // This timer has in +/- 10ms accuracy due to programming structure.
+	defaultTimeout = 1 * time.Minute // This program has in +/- 10ms accuracy due to its structure.
 
 	ε = 0.03 // ε-greedy
 
-	C = 0.012 // UCB-SP
-	W = 0.0   // UCB Best score
+	C = 40  // UCB-SP
+	W = 0.0 // UCB Best score
 )
 
-var profiling = flag.Bool("pprof", false, "launch a live profiling web service on port 6060")
+var (
+	input       = flag.String("f", "", "problem file")
+	duration    = flag.String("t", "", "timeout")
+	interactive = flag.Bool("i", false, "launch an inspection console at the end of the search")
+	profiling   = flag.Bool("pprof", false, "launch a live profiling web service on port 6060")
+)
 
 func main() {
 	flag.Parse()
+
 	if *profiling {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:6060", nil))
 		}()
 	}
 
+	var timeout = defaultTimeout
+	if len(*duration) > 0 {
+		duration, err := time.ParseDuration(*duration)
+		if err != nil {
+			timeout = duration
+		}
+	}
+
+	if len(*input) == 0 {
+		if err := fmt.Errorf("no input file"); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	file, err := os.Open(*input)
+	if err != nil {
+		panic(err)
+	}
+
 	const KB = 1024
 
-	reader := bufio.NewReaderSize(os.Stdin, 1*KB)
+	reader := bufio.NewReaderSize(file, 1*KB)
 	writer := bufio.NewWriterSize(os.Stdout, 1*KB)
 
 	fields := strings.Split(readln(reader), " ")
@@ -56,40 +83,51 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	b := samegame.NewSameBoard(h, w)
-
 	b.Load(board)
 
 	gs := mcs.GameState(samegame.State(b))
 
 	writeln(writer, b.String())
 	if err := writer.Flush(); err != nil {
-		panic("flush")
+		panic(err)
 	}
 
-	start := time.Now()
+	policies := []mcs.GamePolicy{
+		mcs.GamePolicy(samegame.TabooColor),
+		//mcs.GamePolicy(samegame.TabooColor),
+		//mcs.GamePolicy(samegame.NoTaboo),
+	}
 
-	policies := []mcs.GamePolicy{samegame.TabooColor}
 	root := mcs.NewRoot(gs, ε, C, W)
 
+	start := time.Now()
 	result := mcs.ConfidentSearch(root, policies, timeout)
-	score, tiles := result.Score(), result.Moves()
-
 	elapsed := time.Since(start)
 
-	fmt.Println(tiles, tiles.Len())
+	score, tiles := result.Score(), result.Moves()
 
+	clone := b.Clone()
 	for i, tile := range tiles {
-		tile := game.Tile(tile)
-		color := b.TileColor(tile)
-		b = b.Remove(tile)
+		color := clone.TileColor(game.Tile(tile))
+		clone = clone.Remove(game.Tile(tile))
 		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiString(tile.String())))
-		writeln(writer, b.String())
+		writeln(writer, clone.String())
 	}
 	writeln(writer, fmt.Sprintf("TimedUCT took %v value: %v (%d nodes)", elapsed, score, mcs.NodeCount()))
+
 	if err := writer.Flush(); err != nil {
-		panic("flush")
+		panic(err)
 	}
 
+	if *interactive {
+		mcs.Cli(root)
+	}
+
+	if err := file.Close(); err != nil {
+		panic(err)
+	}
+
+	//panic("Show stack")
 }
 
 func atoi(s string) int {
