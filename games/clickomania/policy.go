@@ -1,14 +1,20 @@
-/* policy.go
-erik adelbert - 2018 - erik _ adelbert _ fr
-*/
+// Copyright 2018 Erik Adelbert. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package clickgame
 
 import "mcs/pkg/game"
 
+// Mode indicates how the policy is to be used.
 type Mode int
-
 const (
-	PerPlayout Mode = iota
+	// PerSampling indicates that the policy has to be called once
+	// at the start of the simulation.
+	PerSampling Mode = iota
+
+	// PerMove indicates that the policy has to be called for each
+	// move during the simulation.
 	PerMove
 )
 
@@ -18,10 +24,10 @@ type ColorPolicy func(ClickBoard) (game.Color, Mode)
 // NoTaboo deactivate taboo selection.
 func NoTaboo(board ClickBoard) (game.Color, Mode) {
 	_ = board
-	return game.NoColor, PerPlayout
+	return game.NoColor, PerSampling
 }
 
-// A taboo color is not to be played unless it is the only available move.
+// TabooColor returns a color ot to be played unless it is the only available move.
 func TabooColor(board ClickBoard) (game.Color, Mode) {
 
 	taboo, max := game.NoColor, 0.0
@@ -31,5 +37,5 @@ func TabooColor(board ClickBoard) (game.Color, Mode) {
 		}
 	}
 
-	return taboo, PerPlayout
+	return taboo, PerSampling
 }

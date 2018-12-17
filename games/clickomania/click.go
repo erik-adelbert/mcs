@@ -1,23 +1,25 @@
-/* click.go
-erik adelbert - 2018 - erik _ adelbert _ fr
-*/
+// Copyright 2018 Erik Adelbert. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package clickgame
 
 import (
-	"mcs/pkg/game"
 	"strings"
+
+	"mcs/pkg/game"
 )
 
 // ClickBoard maintains an histogram alongside a  board. It's a convenience type which only
 // purpose is performance. By incrementally computing histograms of boards in inner loops,
-// it provides more time for examples solving.
-
+// it provides more time for problem solving.
 type ClickBoard struct {
 	b game.Board
 	h game.Histogram
 }
 
-// Returns an initialized 0-value ClickBoard. Storage is allocated but board is empty.
+// NewClickBoard returns an initialized 0-value ClickBoard.
+// Storage is allocated but board is empty.
 func NewClickBoard(h, w int) ClickBoard {
 	board := game.NewBoard(h, w)
 	histo := make(game.Histogram, int(game.AllColors))
@@ -25,15 +27,17 @@ func NewClickBoard(h, w int) ClickBoard {
 	return ClickBoard{board, histo}
 }
 
+// Cap returns the maximum number of blocks a board can have.
 func (cb ClickBoard) Cap() int {
 	return cb.b.Cap()
 }
 
+// Caps returns the maximum lines and columns a board can have.
 func (cb ClickBoard) Caps() (int, int) {
 	return cb.b.Caps()
 }
 
-// Returns a full copy with its own storage.
+// Clone returns an independent copy of a board.
 func (cb ClickBoard) Clone() ClickBoard {
 	histo := make(game.Histogram, int(game.AllColors))
 	for k, v := range cb.h {
@@ -45,28 +49,27 @@ func (cb ClickBoard) Clone() ClickBoard {
 	return ClickBoard{board, histo}
 }
 
-// Builds and lists all tiles grouped by color.
+// ColorTiles extract and lists all tiles of the calling board grouped by color.
 func (cb ClickBoard) ColorTiles() game.ColorTiles {
 	return cb.b.ColorTiles()
 }
 
-// A ClickBoard's size is the underlying board's size
+// Dims returns the current size of a board.
 func (cb ClickBoard) Dims() (int, int) {
 	return cb.b.Dims()
 }
 
-// By construction, the histogram is returned in Θ(1).
-// This is a desired behaviour for this object.
+// Histogram is returned in Θ(1). This is a desired behaviour for this object.
 func (cb ClickBoard) Histogram() game.Histogram {
 	return cb.h
 }
 
-// A ClickBoard's len is the underlying board's len
+// Len is the underlying board's len
 func (cb ClickBoard) Len() int {
 	return cb.b.Len()
 }
 
-// Loads a ClickBoard from strings and initializes its histogram.
+// Load a ClickBoard from strings and initializes its histogram.
 func (cb ClickBoard) Load(buf []string) {
 	cb.b.Load(buf)
 
@@ -75,7 +78,7 @@ func (cb ClickBoard) Load(buf []string) {
 	}
 }
 
-// Randomizes the ClickBoard  with n colors :
+// Randomize the ClickBoard  with n colors :
 //  - repeating a color modifies the distribution accordingly.
 //  - passing 'AllColors' adds one of every color to the list.
 //  - a one color list produces a board filled with a unique tile.
@@ -89,9 +92,9 @@ func (cb ClickBoard) Randomize(list ...game.Color) {
 	}
 }
 
-// Removes a tile from the board. The resulting histogram is built in Θ(m)
-// with m < 7, the number of colors initially present on the board.
-// This is a desired behaviour for this object.
+// Remove a tile from the board. The resulting histogram is built in Θ(m)
+// with m < 7, the number of colors initially present on the board. This is
+// a desired behaviour for this object.
 func (cb ClickBoard) Remove(t game.Tile) ClickBoard {
 	color := cb.TileColor(t)
 
@@ -120,7 +123,7 @@ func (cb ClickBoard) String() string {
 	return s.String()
 }
 
-// Returns the color of a given tile.
+// TileColor returns the color of a given tile.
 func (cb ClickBoard) TileColor(t game.Tile) game.Color {
 	// The color of a tile is the color of its first block
 	if len(t) == 0 {
@@ -131,7 +134,7 @@ func (cb ClickBoard) TileColor(t game.Tile) game.Color {
 	return cb.b[block.Row()][block.Column()]
 }
 
-// Builds and lists all tiles.
+// Tiles extract and lists all tiles.
 func (cb ClickBoard) Tiles() game.Tiles {
 	return cb.b.Tiles()
 }
