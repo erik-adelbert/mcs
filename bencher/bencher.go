@@ -1,6 +1,6 @@
-/* bencher.go - Building benchmarks
-erik adelbert - 2018 - erik _ adelbert _ fr
-*/
+// Copyright 2018 Erik Adelbert. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package bencher
 
