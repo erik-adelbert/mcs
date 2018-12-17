@@ -29,7 +29,7 @@ var (
 // Cli launches an interactive console which has basic Monte-Carlo trees navigational capacities.
 // Available commands are listed when invoking 'help'. Node's fields are accessible trough their
 // getters: to get a field's value, it's sufficient to type its name.
-// Path are supported : '/0/1/state' will display the board associated with the second child
+// Paths are supported : '/0/1/state' will display the board associated with the second child
 // of the first child of root.
 func Cli(root *Node) {
 
