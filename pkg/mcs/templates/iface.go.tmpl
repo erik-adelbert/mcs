@@ -1,0 +1,114 @@
+// Copyright 2018 Erik Adelbert. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package mcs
+
+import "mcs/games/{{.GamePackage}}"
+
+// (╯°□°）╯︵ ┻━┻ poor mans's generic:
+
+// GameState can be anything that describes accurately the state of a game.
+// In samegame it's a board.
+type GameState {{.GamePackage}}.State
+
+// Clone returns a memory-independent copy.
+func (g GameState) Clone() GameState {
+	return GameState({{.GamePackage}}.State(g).Clone())
+}
+
+// Moves returns a list of legal moves from the calling state.
+func (g GameState) Moves() MoveSet {
+	return MoveSet({{.GamePackage}}.State(g).Moves())
+}
+
+// Play returns the game state after the given move has been played in the
+// calling state.
+func (g GameState) Play(m Move) GameState {
+	return GameState({{.GamePackage}}.State(g).Play(m.({{.GamePackage}}.Move)))
+}
+
+// Sample simulates a game to its end by applying a move selection policy. The policy usually
+// embeds randomness.
+func (g GameState) Sample(done <-chan struct{}, p GamePolicy) Decision {
+	s, m := {{.GamePackage}}.State(g).Sample(done, {{.GamePackage}}.ColorPolicy(p))
+	return Decision{s, MoveSequence(m)}
+}
+
+// Score returns a statically computed score of the calling state.
+func (g GameState) Score() float64 {
+	return {{.GamePackage}}.State(g).Score()
+}
+
+func (g GameState) String() string {
+	return {{.GamePackage}}.State(g).String()
+}
+
+
+// A Move is scorable, has a length and is printable.
+type Move interface {
+	Score() float64
+	Len() int
+	String() string
+}
+
+
+// MoveSequence is a FIFO structure.
+type MoveSequence {{.GamePackage}}.Sequence
+
+// Clone returns an independent copy of the calling sequence.
+func (s MoveSequence) Clone() MoveSequence {
+	return MoveSequence({{.GamePackage}}.Sequence(s).Clone())
+}
+
+// Dequeue returns the next move. It is customary for FIFO structures.
+func (s MoveSequence) Dequeue() (Move, MoveSequence) {
+	move, seq := {{.GamePackage}}.Sequence(s).Dequeue()
+	return Move(move), MoveSequence(seq)
+}
+
+// Enqueue adds a move to a sequence. It is customary for FIFO structures.
+func (s MoveSequence) Enqueue(m Move) MoveSequence {
+	return MoveSequence({{.GamePackage}}.Sequence(s).Enqueue(m.({{.GamePackage}}.Move)))
+}
+
+// Join returns an aggregated sequence.
+func (s MoveSequence) Join(t MoveSequence) MoveSequence {
+	return MoveSequence({{.GamePackage}}.Sequence(s).Join({{.GamePackage}}.Sequence(t)))
+}
+
+// Len returns the number of moves in the sequence.
+func (s MoveSequence) Len() int {
+	return {{.GamePackage}}.Sequence(s).Len()
+}
+
+
+// MoveSet is a collection of legal moves.
+type MoveSet {{.GamePackage}}.Hand
+
+// Draw randomly removes a move from the set.
+func (m MoveSet) Draw() (Move, MoveSet) {
+	move, set := {{.GamePackage}}.Hand(m).Draw()
+	return Move(move), MoveSet(set)
+}
+
+// Len returns the number of legal moves.
+func (m MoveSet) Len() int {
+	return {{.GamePackage}}.Hand(m).Len()
+}
+
+// List returns all the moves present in the set.
+func (m MoveSet) List() []Move {
+	list := {{.GamePackage}}.Hand(m).List()
+
+	moves := make([]Move, 0, len(list))
+	for _, move := range list {
+		moves = append(moves, Move(move))
+	}
+	return moves
+}
+
+
+// GamePolicy is a game policy used during the simulation step.
+// It is a reference passed back to the game sampler.
+type GamePolicy {{.GamePackage}}.ColorPolicy
