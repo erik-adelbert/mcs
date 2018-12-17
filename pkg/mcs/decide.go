@@ -12,7 +12,8 @@ import (
 )
 
 // Decision is made of a sequence of moves from the starting position that yields
-// the recorded score. Decisions are fully determined during games simulations.
+// the recorded score. Decisions are formed during selection/expansion and finalized
+// during games simulations.
 type Decision struct {
 	moves  MoveSequence
 	score  float64
