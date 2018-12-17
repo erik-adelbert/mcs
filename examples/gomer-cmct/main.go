@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	timeout = 1 * time.Minute // This program has in +/- 5ms accuracy due to its structure.
+	defaultTimeout = 1 * time.Minute // This program has in +/- 10ms accuracy due to its structure.
 
 	ε = 0.03 // ε-greedy
 
@@ -33,6 +33,7 @@ const (
 
 var (
 	input       = flag.String("f", "", "problem file")
+	duration    = flag.String("t", "", "timeout")
 	interactive = flag.Bool("i", false, "launch an inspection console at the end of the search")
 	profiling   = flag.Bool("pprof", false, "launch a live profiling web service on port 6060")
 )
@@ -44,6 +45,14 @@ func main() {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:6060", nil))
 		}()
+	}
+
+	var timeout = defaultTimeout
+	if len(*duration) > 0 {
+		duration, err := time.ParseDuration(*duration)
+		if err != nil {
+			timeout = duration
+		}
 	}
 
 	if len(*input) == 0 {
@@ -83,16 +92,13 @@ func main() {
 		panic(err)
 	}
 
-	//mcs.SelectUCB(mcs.UCBV)
-
 	policies := []mcs.GamePolicy{
 		mcs.GamePolicy(samegame.TabooColor),
-		mcs.GamePolicy(samegame.TabooColor),
+		//mcs.GamePolicy(samegame.TabooColor),
 		//mcs.GamePolicy(samegame.NoTaboo),
 	}
 
 	root := mcs.NewRoot(gs, ε, C, W)
-	//root := mcs.NewRoot(gs, ε, 1.2, 1)
 
 	start := time.Now()
 	result := mcs.ConcurrentSearch(root, policies, timeout)
@@ -107,7 +113,7 @@ func main() {
 		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiString(tile.String())))
 		writeln(writer, clone.String())
 	}
-	writeln(writer, fmt.Sprintf("TimedUCT took %v value: %v (%d nodes)", elapsed, score, mcs.NodeCount()))
+	writeln(writer, fmt.Sprintf("TimedCMCT took %v value: %v (%d nodes)", elapsed, score, mcs.NodeCount()))
 
 	if err := writer.Flush(); err != nil {
 		panic(err)
