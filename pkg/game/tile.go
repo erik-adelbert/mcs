@@ -11,7 +11,7 @@ import (
 
 type (
 	// A Tile is a game piece, it's a list of blocks.
-	Tile  []Block
+	Tile []Block
 
 	// Tiles is a set of tiles.
 	Tiles []Tile
@@ -85,7 +85,7 @@ func (c ColorTiles) PickTile(taboo Color) Tile {
 
 	var tile Tile
 	if tiles := c[color]; len(tiles) > 0 { // Tiles are randomized by construction
-		tile = tiles[0]
+		tile, tiles[0] = tiles[0], nil
 
 		if len(tiles) == 1 {
 			delete(c, color)
@@ -236,7 +236,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 			// Enqueue current block to its labeled tile
 			var tile Tile
 			if tile = t[array[i][j]]; len(tile) == 0 {
-				tile = make(Tile, 0, 16)
+				tile = make(Tile, 0, 4)
 			}
 			tile = append(tile, Block{i - 1, j - 1})
 			t[array[i][j]] = tile

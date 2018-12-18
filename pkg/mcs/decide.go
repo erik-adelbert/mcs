@@ -27,8 +27,6 @@ func (d Decision) Clone() Decision {
 	clone.moves = make(MoveSequence, d.Moves().Len())
 	copy(clone.moves, d.Moves())
 	clone.score = d.Score()
-	//clone.solved = d.solved
-
 	return clone
 }
 
@@ -36,7 +34,6 @@ func (d Decision) Clone() Decision {
 func (d Decision) Join(other Decision) Decision {
 	d.moves = d.moves.Join(other.Moves())
 	d.score += other.Score()
-	//d.solved = d.solved + other.solved
 	return d
 }
 

@@ -175,7 +175,7 @@ func NewNode(up *Node, edge Move, state GameState, hand MoveSet, ε, c, w float6
 		state: state,
 		hand:  hand,
 
-		down: make([]*Node, 0, 24), // average branching factor is 20.7
+		//down: make([]*Node, 0, 24), // average branching factor is 20.7
 
 		ε: ε,
 		c: c,

@@ -98,7 +98,7 @@ func (b Board) Histogram() Histogram {
 			m[b[i][j]] = m[b[i][j]] + 1.0
 		}
 	}
-	delete(m, NoColor) // Remove shrink cells count
+	delete(m, NoColor) // Remove empty cells count
 
 	return m
 }
