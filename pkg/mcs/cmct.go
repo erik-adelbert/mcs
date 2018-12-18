@@ -127,8 +127,8 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 		}
 	}
 
-// Broadcast termination message (done) to all goroutines
-// and return the best sequence found so far.
+	// Broadcast termination message (done) to all goroutines
+	// and return the best sequence found so far.
 conclusion:
 	close(done)
 	return tree.Best()
@@ -154,9 +154,9 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 
 			switch node.Status() {
 			case walked:
-				node.SetStatus(sampling)
+				node.SetStatus(simulating)
 			default:
-				//fmt.Printf("sampling %v node %d\n", node.Status(), node.Status())
+				//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
 				//continue
 			}
 
@@ -165,19 +165,19 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 				out := make(chan job, 1)
 
 				start := state.Clone()
-				sampled := decision.Clone()
+				simulated := decision.Clone()
 
 				go func(policy GamePolicy, start GameState, local Decision) { // go simulate
 					defer close(out)
 
-					sampled = sampled.Join(start.Sample(done, policy, 1.0/float64(len(policies))))
+					simulated = simulated.Join(start.Sample(done, policy, 1.0/float64(len(policies))))
 
 					select {
 					case <-done:
 						return
-					case out <- job{node, sampled}:
+					case out <- job{node, simulated}:
 					}
-				}(policy, start, sampled)
+				}(policy, start, simulated)
 
 				chans = append(chans, out)
 			}
@@ -202,9 +202,9 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 				go output(c)
 			}
 			wg.Wait()
-			node.SetStatus(sampled)
+			node.SetStatus(simulated)
 			//} else {
-			//	node.SetStatus(sampled)
+			//	node.SetStatus(simulated)
 			//	outcome <- job{node, node.Best()}
 		}
 	}
@@ -232,9 +232,9 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 
 			switch node.Status() {
 			case walked:
-				node.SetStatus(sampling)
+				node.SetStatus(simulating)
 			default:
-				//fmt.Printf("sampling %v node %d\n", node.Status(), node.Status())
+				//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
 				//continue
 			}
 
@@ -245,13 +245,13 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 			case <-done:
 				return
 			case outcome <- job{node, sampled}:
-				node.SetStatus(sampled)
+				node.SetStatus(simulated)
 			}
 		}
 	}
 }
 
-// An updater is asynchronously back propagating scores received from sampling.
+// An updater is asynchronously back propagating scores received from simulating.
 // It computes UCB values along the way.
 func updater(done <-chan struct{}, outcome <-chan job) {
 	for {
@@ -260,7 +260,7 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 			return
 		case outcome := <-outcome:
 			node, decision := outcome.node, outcome.decision
-			//if node != nil && (node.Status() != sampled && node.Status() != sampling) {
+			//if node != nil && (node.Status() != simulated && node.Status() != simulating) {
 			if node != nil {
 				node.UpdateTree(decision)
 				node.SetStatus(idle)
@@ -303,7 +303,7 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 
 			if node != nil {
 				node.SetStatus(walked)
-				position <- job{node, Decision{score: score, moves: moves}} // pass along to sampling
+				position <- job{node, Decision{score: score, moves: moves}} // pass along to simulating
 			}
 		}
 	}

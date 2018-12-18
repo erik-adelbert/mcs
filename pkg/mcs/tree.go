@@ -86,8 +86,8 @@ type NodeStatus int
 const (
 	idle NodeStatus = iota
 	walked
-	sampling
-	sampled
+	simulating
+	simulated
 )
 
 func (ns NodeStatus) String() string {
@@ -96,10 +96,10 @@ func (ns NodeStatus) String() string {
 		return "idle"
 	case walked:
 		return "walked"
-	case sampled:
-		return "sampled"
-	case sampling:
-		return "sampling"
+	case simulated:
+		return "simulated"
+	case simulating:
+		return "simulating"
 	default:
 		return "unknown"
 	}
