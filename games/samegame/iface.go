@@ -112,7 +112,7 @@ func (sg State) Play(m Move) State {
 
 // Sample simulates a game to its end by applying a move selection policy. The policy usually
 // embeds randomness.
-func (sg State) Sample(done <-chan struct{}, policy ColorPolicy, solved float64) (float64, Sequence, float64) {
+func (sg State) Sample(done <-chan struct{}, policy ColorPolicy) (float64, Sequence) {
 
 	board := SameBoard(sg)
 	tiles := board.ColorTiles()
@@ -125,14 +125,10 @@ func (sg State) Sample(done <-chan struct{}, policy ColorPolicy, solved float64)
 	var seq Sequence
 	var score float64
 
-	if len(tiles) > 1 {
-		solved = 0
-	}
-
 	for len(tiles) > 0 {
 		select {
 		case <-done:
-			return score, seq, solved
+			return score, seq
 		default:
 			if c, mode := policy(board); mode == PerMove {
 				taboo = c
@@ -149,7 +145,7 @@ func (sg State) Sample(done <-chan struct{}, policy ColorPolicy, solved float64)
 	}
 	score += State(board).Score()
 
-	return score, seq, solved
+	return score, seq
 }
 
 // Score returns a statically computed score of the calling state.
