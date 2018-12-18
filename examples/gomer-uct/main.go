@@ -85,7 +85,7 @@ func main() {
 		root := mcs.NewRoot(gs, ε, C, W)
 
 		start := time.Now()
-		result := mcs.ConcurrentSearch(root, policies, timeout)
+		result := mcs.ConfidentSearch(root, policies, timeout)
 		elapsed := time.Since(start)
 
 		replay(writer, b, result)
