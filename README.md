@@ -2,6 +2,7 @@
 mcs is a package implementing CMCT, a Concurrent Monte-Carlo Search for Tree akin to a concurrent UCT.
 
 ```bash 
+$ cd go/src
 $ git clone https://github.com/erik-adelbert/mcs.git
 $ cd mcs/examples/gomer-uct/
 $ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt
@@ -10,6 +11,7 @@ $ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt
 Benchmark is available but will take at least 20\*50mn to complete and generate a lot of log files:
 
 ```bash 
+$ cd go/src
 $ git clone https://github.com/erik-adelbert/mcs.git
 $ cd mcs/examples/benchmarks/
 $ go test -timeout 0
@@ -18,6 +20,7 @@ $ go test -timeout 0
 There's also a Makefile:
 
 ```bash 
+$ cd go/src
 $ git clone https://github.com/erik-adelbert/mcs.git
 $ make check
 $ make bench
