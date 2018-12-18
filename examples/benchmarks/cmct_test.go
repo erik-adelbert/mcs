@@ -14,6 +14,7 @@ import (
 	"mcs/games/samegame"
 	"mcs/pkg/mcs"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -94,6 +95,9 @@ func TestSameGameStandardSet(t *testing.T) {
 					if err := benchmark.Run(); err != nil {
 						t.Fatal(err)
 					}
+
+					// Force memory recuperation before next iteration
+					runtime.GC()
 				}
 			}
 
