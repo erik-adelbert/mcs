@@ -26,7 +26,7 @@ var (
 	wdir = "/"
 )
 
-// Cli launches an interactive console which has basic Monte-Carlo trees navigational capacities.
+// Cli launches an interactive console which has basic Monte-Carlo tree navigational capacities.
 // Available commands are listed when invoking 'help'. Node's fields are accessible trough their
 // getters: to get a field's value, it's sufficient to type its name.
 // Paths are supported : '/0/1/state' will display the board associated with the second child
