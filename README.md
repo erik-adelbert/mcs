@@ -7,6 +7,14 @@ $ cd mcs/examples/gomer-uct/
 $ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt
 ```
 
+Benchmark is available but will take at least 20\*50mn to complete:
+
+```bash 
+$ git clone https://github.com/erik-adelbert/mcs.git
+$ cd mcs/examples/benchmarks/
+$ go test -timeout 0
+```
+
 See the [up to date documentation.](https://godoc.org/github.com/erik-adelbert/mcs/pkg/mcs)\
 See also the [Clickomania/Samegame boardgame engine documentation.](https://godoc.org/github.com/erik-adelbert/mcs/pkg/game)
 
