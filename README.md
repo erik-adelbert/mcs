@@ -7,7 +7,7 @@ $ cd mcs/examples/gomer-uct/
 $ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt
 ```
 
-Benchmark is available but will take at least 20\*50mn to complete:
+Benchmark is available but will take at least 20\*50mn to complete and generate a lot of log files:
 
 ```bash 
 $ git clone https://github.com/erik-adelbert/mcs.git
