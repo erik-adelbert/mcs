@@ -9,4 +9,4 @@ bench :
 	cd examples/benchmarks; go test -v -timeout 0
 
 clean :
-    cd examples/benchmarks; rm *log
+	cd examples/benchmarks; rm *log
