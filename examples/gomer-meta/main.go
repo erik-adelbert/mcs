@@ -23,6 +23,8 @@ import (
 )
 
 const (
+	KB = 1024
+
 	defaultTimeout = 1 * time.Minute // This program has in +/- 10ms accuracy due to its structure.
 
 	ε = 0.03 // ε-greedy
@@ -47,6 +49,17 @@ func main() {
 		}()
 	}
 
+	if len(*input) == 0 {
+		if err := fmt.Errorf("no input file"); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	writer := bufio.NewWriterSize(os.Stdout, 1*KB)
+
+	rand.Seed(time.Now().UnixNano())
+
 	var timeout = defaultTimeout
 	if len(*duration) > 0 {
 		duration, err := time.ParseDuration(*duration)
@@ -55,79 +68,71 @@ func main() {
 		}
 	}
 
-	if len(*input) == 0 {
-		if err := fmt.Errorf("no input file"); err != nil {
-			panic(err)
+	h, w, board := load(input)
+	b := samegame.NewSameBoard(h, w)
+	b.Load(board)
+
+	writeln(writer, b.String())
+	flush(writer)
+
+	{ // Everything has been taken care of, this is the core code:
+		gs := mcs.GameState(b)
+
+		policies := []mcs.GamePolicy{
+			mcs.GamePolicy(samegame.TabooColor),
 		}
-		return
+
+		root := mcs.NewRoot(gs, ε, C, W)
+
+		start := time.Now()
+		result := mcs.MetaSearch(root, policies, timeout)
+		elapsed := time.Since(start)
+
+		replay(writer, b, result)
+
+		writeln(writer, fmt.Sprintf("Meta took %v value: %v (%d nodes)", elapsed, result.Score(), mcs.NodeCount()))
+		flush(writer)
+
+		if *interactive {
+			mcs.Cli(root)
+		}
 	}
 
-	file, err := os.Open(*input)
+	//panic("Show stack")
+}
+
+func load(fname *string) (h, w int, board []string) {
+	file, err := os.Open(*fname)
 	if err != nil {
 		panic(err)
 	}
 
-	const KB = 1024
-
 	reader := bufio.NewReaderSize(file, 1*KB)
-	writer := bufio.NewWriterSize(os.Stdout, 1*KB)
 
 	fields := strings.Split(readln(reader), " ")
-	h, w := atoi(fields[0]), atoi(fields[1])
+	h, w = atoi(fields[0]), atoi(fields[1])
 
-	board := make([]string, 0, h)
+	board = make([]string, 0, h)
 	for i := 0; i < h; i++ {
 		board = append(board, readln(reader))
-	}
-
-	rand.Seed(time.Now().UnixNano())
-
-	b := samegame.NewSameBoard(h, w)
-	b.Load(board)
-
-	gs := mcs.GameState(samegame.State(b))
-
-	writeln(writer, b.String())
-	if err := writer.Flush(); err != nil {
-		panic(err)
-	}
-
-	policies := []mcs.GamePolicy{
-		mcs.GamePolicy(samegame.TabooColor),
-		//mcs.GamePolicy(samegame.TabooColor),
-		//mcs.GamePolicy(samegame.NoTaboo),
-	}
-
-	root := mcs.NewRoot(gs, ε, C, W)
-
-	start := time.Now()
-	result := mcs.MetaSearch(root, policies, timeout)
-	elapsed := time.Since(start)
-
-	score, tiles := result.Score(), result.Moves()
-
-	clone := b.Clone()
-	for i, tile := range tiles {
-		color := clone.TileColor(game.Tile(tile))
-		clone = clone.Remove(game.Tile(tile))
-		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiString(tile.String())))
-		writeln(writer, clone.String())
-	}
-	writeln(writer, fmt.Sprintf("TimedMeta took %v value: %v (%d nodes)", elapsed, score, mcs.NodeCount()))
-
-	if err := writer.Flush(); err != nil {
-		panic(err)
-	}
-
-	if *interactive {
-		mcs.Cli(root)
 	}
 
 	if err := file.Close(); err != nil {
 		panic(err)
 	}
 
-	//panic("Show stack")
+	return
+}
+
+func replay(writer *bufio.Writer, b samegame.SameBoard, solution mcs.Decision) {
+	moves := solution.Moves()
+	for i, tile := range moves {
+		color := b.TileColor(game.Tile(tile))
+		b = b.Remove(game.Tile(tile))
+
+		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiString(tile.String())))
+		writeln(writer, b.String())
+	}
 }
 
 func atoi(s string) int {
@@ -151,6 +156,12 @@ func writeln(w *bufio.Writer, s string) {
 		panic(err)
 	}
 	if err := w.WriteByte('\n'); err != nil {
+		panic(err)
+	}
+}
+
+func flush(w *bufio.Writer) {
+	if err := w.Flush(); err != nil {
 		panic(err)
 	}
 }
