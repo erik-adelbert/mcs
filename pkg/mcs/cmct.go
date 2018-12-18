@@ -52,14 +52,15 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 		panic("no root")
 	}
 
-	tree := NewTree(root)
+	// All possible first moves are expanded
+	tree := GrowTree(root)
 
 	done := make(chan struct{})
 	timeout := make(chan bool)
 
 	// Start the countdown asap: the search must return a decision
 	// in the given time frame. A late decision is as good as an
-	// illegal move, it's disqualifying (ie. automatic lose).
+	// illegal move, it's disqualifying.
 	go func() {
 		time.Sleep(duration)
 		close(timeout)
