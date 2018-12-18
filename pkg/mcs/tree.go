@@ -134,6 +134,29 @@ type Node struct {
 	w float64
 }
 
+// CloneRoot returns a memory independent copy of the calling node.
+func CloneRoot(root *Node) *Node {
+	initial, ε, c, w := root.State().Clone(), root.ε, root.c, root.w
+
+	clone := NewRoot(initial, ε, c, w)
+	clone.best = root.Best().Clone()
+
+	return clone
+}
+
+// GrowTree expands a root node in order to bootstrap a search.
+func GrowTree(root *Node) *Node {
+
+	if root == nil || root.hand.Len() == 0 {
+		// TODO: error  handling
+		panic("no moves")
+	}
+
+	root.ExpandAll(math.Inf(1))
+
+	return root
+}
+
 // NewNode allocates a Monte-Carlo tree node.
 func NewNode(up *Node, edge Move, state GameState, hand MoveSet, ε, c, w float64) *Node {
 	nodeCountInc()
@@ -168,29 +191,6 @@ func NewNode(up *Node, edge Move, state GameState, hand MoveSet, ε, c, w float6
 // during the search.
 func NewRoot(initial GameState, ε, c, w float64) *Node {
 	return NewNode(nil, nil, initial, initial.Moves(), ε, c, w)
-}
-
-// NewTree expands a root node in order to bootstrap a search.
-func NewTree(root *Node) *Node {
-
-	if root == nil || root.hand.Len() == 0 {
-		// TODO: error  handling
-		panic("no moves")
-	}
-
-	root.ExpandAll(math.Inf(1))
-
-	return root
-}
-
-// CloneRoot returns a memory independent copy of the calling node.
-func CloneRoot(root *Node) *Node {
-	initial, ε, c, w := root.State().Clone(), root.ε, root.c, root.w
-
-	clone := NewRoot(initial, ε, c, w)
-	clone.best = root.Best().Clone()
-
-	return clone
 }
 
 // Best returns the best sequence found so far.

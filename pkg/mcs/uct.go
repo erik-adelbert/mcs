@@ -19,7 +19,7 @@ func ConfidentSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 		panic("no tree")
 	}
 
-	tree := NewTree(root)
+	tree := GrowTree(root)
 
 	done := make(chan struct{})
 	timeout := make(chan bool)
