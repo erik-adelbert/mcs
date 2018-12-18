@@ -42,7 +42,7 @@ func ConfidentSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 				return tree.Best()
 			}
 
-			const VisitThreshold = 10
+			const VisitThreshold = 8
 
 			var score float64
 			var moves MoveSequence
