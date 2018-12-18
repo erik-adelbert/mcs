@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// This benchmark is to be launched by 'go test -timeout 0'
+
 package benchmark
 
 import (
@@ -54,13 +56,13 @@ func TestSameGameStandardSet(t *testing.T) {
 	constants := []struct{ ε, C, W float64 }{
 		{0.03, 1000, 0},
 		{0.03, 40, 0},
-		{0.03, 40, 0.2},
+		//{0.03, 40, 0.2},
 	}
 
 	durations := []time.Duration{
 		10 * time.Minute,
 		//20 * time.Minute,
-		//40 * time.Minute,
+		40 * time.Minute,
 		//60 * time.Minute,
 	}
 
