@@ -444,7 +444,7 @@ func (n *Node) Status() NodeStatus {
 	}
 }
 
-// StDev is a safe running variance.
+// StDev is a safe running standard deviation.
 func (n *Node) StDev() float64 {
 
 	return math.Sqrt(n.Variance())
