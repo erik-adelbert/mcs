@@ -368,7 +368,7 @@ func (n *Node) IsSolvedUnsafe() bool {
 
 }
 
-// IsTerminal if true if the calling node is the second to
+// IsTerminal is true if the calling node is the second to
 // last move of a game.
 func (n *Node) IsTerminal() bool {
 
