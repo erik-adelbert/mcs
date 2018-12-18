@@ -1,9 +1,11 @@
 # mcs
 mcs is a package implementing CMCT, a Concurrent Monte-Carlo Search for Tree akin to a concurrent UCT.
 
-```bash $ git clone https://github.com/erik-adelbert/mcs.git
+```bash 
+$ git clone https://github.com/erik-adelbert/mcs.git
 $ cd mcs/examples/gomer-uct/
-$ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt```
+$ go run ./main.go -i -f ../../assets/www.js-game.de/problem01.txt
+```
 
 See the [up to date documentation.] (godoc.org/github.com/erik-adelbert/mcs/pkg/mcs)
 See also the [Clickomania/Samegame boardgame engine documentation.] (godoc.org/github.com/erik-adelbert/mcs/pkg/game)
