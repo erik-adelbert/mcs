@@ -15,7 +15,7 @@ $ cd mcs/examples/benchmarks/
 $ go test -timeout 0
 ```
 
-There is also a make file:
+There's also a Makefile:
 
 ```bash 
 $ git clone https://github.com/erik-adelbert/mcs.git
