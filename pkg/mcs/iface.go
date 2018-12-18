@@ -30,10 +30,10 @@ func (g GameState) Play(m Move) GameState {
 
 // Sample simulates a game to its end by applying a move selection policy. The policy usually
 // embeds randomness.
-func (g GameState) Sample(done <-chan struct{}, policy GamePolicy, solved float64) Decision {
-	score, moves, solved := samegame.State(g).Sample(done, samegame.ColorPolicy(policy), solved)
+func (g GameState) Sample(done <-chan struct{}, policy GamePolicy) Decision {
+	score, moves := samegame.State(g).Sample(done, samegame.ColorPolicy(policy))
 
-	return Decision{MoveSequence(moves), score, solved}
+	return Decision{moves: MoveSequence(moves), score: score}
 }
 
 // Score returns a statically computed score of the calling state.

@@ -44,7 +44,7 @@ func recursiveSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 			final.Moves().Enqueue(node.edge)
 		}
 
-		if moves := node.Best().Moves(); moves.Len() > 0 { // Leaf has been sampled
+		if moves := node.Best().Moves(); moves.Len() > 0 { // Leaf has been simulated
 			final.score += node.Best().Score()
 			final.Moves().Join(node.Best().Moves())
 		} else { // Leaf is terminal
@@ -67,7 +67,7 @@ func recursiveSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 			for i := 0; i < 10; i++ {
 				for _, move := range node.Hand().List() {
 					start := node.State().Clone().Play(move)
-					simulated := start.Sample(done, policies[0], 1.0)
+					simulated := start.Sample(done, policies[0])
 
 					if simulated.Score() > top.Score() {
 						best = move

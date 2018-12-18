@@ -239,7 +239,7 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 			}
 
 			sampled := decision.Clone()
-			sampled = sampled.Join(state.Sample(done, policies[0], 1.0))
+			sampled = sampled.Join(state.Sample(done, policies[0]))
 
 			select {
 			case <-done:

@@ -70,7 +70,7 @@ func ConfidentSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 			if !node.IsSolved() {
 				clone := node.State().Clone()
 
-				sampled := clone.Sample(done, policies[0], 1.0)
+				sampled := clone.Sample(done, policies[0])
 
 				sampled.score += score
 				sampled.moves = moves.Join(sampled.moves)
