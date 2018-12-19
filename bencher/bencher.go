@@ -60,7 +60,7 @@ func (b *Benchmark) Run() error {
 	}
 	elapsed := time.Since(start)
 
-	b.out.Println(" ", mcs.Search(fun).String(), elapsed, game.Name(), result, mcs.NodeCount())
+	b.out.Println(" ", mcs.Search(fun).String(), elapsed, game.Name(), mcs.NodeCount(), result)
 
 	return nil
 }

@@ -4,4 +4,3 @@
 
 // game can be used to represent board games like clickomania or samegame.
 package game
-

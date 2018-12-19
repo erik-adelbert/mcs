@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
 package clickgame
 
 import (
@@ -37,7 +36,6 @@ func (h Hand) List() []Move {
 	return moves
 }
 
-
 // A Move is a tile that can be removed from a board.
 type Move game.Tile
 
@@ -54,7 +52,6 @@ func (m Move) Score() float64 {
 func (m Move) String() string {
 	return game.Tile(m).String()
 }
-
 
 // A Sequence of moves is a FIFO structure.
 type Sequence []Move

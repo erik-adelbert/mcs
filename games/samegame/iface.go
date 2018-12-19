@@ -88,8 +88,8 @@ func (moves Sequence) Len() int {
 
 // Dequeue returns the next move in a sequence.
 func (moves Sequence) Dequeue() (Move, Sequence) {
-	move, moves := moves[0], moves[1:]
-	return move, moves
+	move := moves[0]
+	return move, moves[1:]
 }
 
 // A State describes the board.

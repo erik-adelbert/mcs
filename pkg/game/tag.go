@@ -23,7 +23,6 @@ func (t Tag) ID() int {
 	return int(t) >> 4
 }
 
-
 // Tags is a collection of unique tags.
 type Tags map[Tag]Tag
 

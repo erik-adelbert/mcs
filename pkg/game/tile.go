@@ -149,8 +149,7 @@ func (t TaggedTiles) Colormap(b Board) ColorTiles {
 			if !ok {
 				tiles = make(Tiles, 0, 4)
 			}
-			tiles = append(tiles, tile)
-			m[color] = tiles
+			m[color] = append(tiles, tile)
 		}
 		delete(t, tag)
 	}
@@ -213,7 +212,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 	}
 
 	// 2a - Flooding
-	// Finding the tiles (ie. tagging disjoint sets).
+	// Finding tiles (ie. tagging disjoint sets).
 	tags := NewTags(1 + h*w/8)
 	for i := 1; i < h-1; i++ {
 		for j := 1; j < w-1; j++ {
@@ -223,7 +222,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 				continue
 			}
 
-			// Flooding tags (tags) from north and west
+			// Flooding tags from north and west
 			north, west := array[i-1][j], array[i][j-1]
 			switch {
 			case north.Color() == color && west.Color() == color:
@@ -236,17 +235,16 @@ func (t TaggedTiles) extract(array [][]Tag) {
 				array[i][j] = tags.NewID(color)
 			}
 
-			// Enqueue current block to its labeled tile
+			// Append current block to its labeled tile
 			var tile Tile
 			if tile = t[array[i][j]]; len(tile) == 0 {
 				tile = make(Tile, 0, 2)
 			}
-			tile = append(tile, Block{i - 1, j - 1})
-			t[array[i][j]] = tile
+			t[array[i][j]] = append(tile, Block{i - 1, j - 1})
 		}
 	}
 
-	// 3 - Merge tiles according to previous unification.
+	// 3 - Merge tiles according to previous unifications.
 	for tag := range tags.List() {
 
 		root := tags.Find(tag)
@@ -261,7 +259,6 @@ func (t TaggedTiles) extract(array [][]Tag) {
 		if len(ta) < len(tb) { //  Appends the smallest tile to the bigger one.
 			ta, tb = tb, ta
 		}
-		ta, tb = append(ta, tb...), nil
-		t[root] = ta
+		t[root], ta, tb = append(ta, tb...), nil, nil
 	}
 }

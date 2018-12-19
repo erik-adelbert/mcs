@@ -8,6 +8,7 @@ import "mcs/pkg/game"
 
 // Mode indicates how the policy is to be used.
 type Mode int
+
 const (
 	// PerSampling indicates that the policy has to be called once
 	// at the start of the simulation.
