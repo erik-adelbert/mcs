@@ -13,6 +13,7 @@ import (
 	"mcs/bencher"
 	"mcs/games/samegame"
 	"mcs/pkg/mcs"
+	//_ "net/http/pprof"
 	"os"
 	"runtime"
 	"strconv"
@@ -27,8 +28,15 @@ const (
 )
 
 func TestSameGameStandardSet(t *testing.T) {
-	// 3...
+
+	/*
+		go func() {
+			log.Println(http.ListenAndServe("localhost:6060", nil)) // 3...
+		}()
+	*/
+
 	problems := make([]*bencher.Problem, 0, 20)
+
 	for i := 1; i <= 20; i++ {
 
 		name := fmt.Sprintf("problem%02d", i)
@@ -61,7 +69,7 @@ func TestSameGameStandardSet(t *testing.T) {
 	}
 
 	durations := []time.Duration{
-		10 * time.Minute,
+		2 * time.Minute,
 		//20 * time.Minute,
 		//40 * time.Minute,
 		//60 * time.Minute,

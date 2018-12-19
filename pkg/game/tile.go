@@ -152,7 +152,9 @@ func (t TaggedTiles) Colormap(b Board) ColorTiles {
 			tiles = append(tiles, tile)
 			m[color] = tiles
 		}
+		delete(t, tag)
 	}
+
 	return m
 }
 
@@ -166,10 +168,11 @@ func (t TaggedTiles) List(b Board) Tiles {
 	t.build(b)
 
 	tiles := make(Tiles, 0, len(t))
-	for _, tile := range t { // Randomized by construction
+	for tag, tile := range t { // Randomized by construction
 		if len(tile) > 1 {
 			tiles = append(tiles, tile)
 		}
+		delete(t, tag)
 	}
 	return tiles
 }
@@ -236,7 +239,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 			// Enqueue current block to its labeled tile
 			var tile Tile
 			if tile = t[array[i][j]]; len(tile) == 0 {
-				tile = make(Tile, 0, 4)
+				tile = make(Tile, 0, 2)
 			}
 			tile = append(tile, Block{i - 1, j - 1})
 			t[array[i][j]] = tile
@@ -258,7 +261,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 		if len(ta) < len(tb) { //  Appends the smallest tile to the bigger one.
 			ta, tb = tb, ta
 		}
-		ta = append(ta, tb...)
+		ta, tb = append(ta, tb...), nil
 		t[root] = ta
 	}
 }
