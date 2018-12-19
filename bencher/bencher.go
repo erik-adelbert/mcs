@@ -41,6 +41,8 @@ func (b *Benchmark) Detach() *Game {
 }
 
 func (b *Benchmark) Run() error {
+	mcs.NodeCountReset()
+
 	game := b.game
 
 	initial := game.p.Initial()
@@ -58,7 +60,7 @@ func (b *Benchmark) Run() error {
 	}
 	elapsed := time.Since(start)
 
-	b.out.Println(mcs.Search(fun).String(), elapsed, game.Name(), result)
+	b.out.Println(" ", mcs.Search(fun).String(), elapsed, game.Name(), result, mcs.NodeCount())
 
 	return nil
 }
