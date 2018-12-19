@@ -49,12 +49,12 @@ func TestSameGameStandardSet(t *testing.T) {
 	// 2...
 	searchers := []*bencher.Searcher{
 		bencher.NewSearcher("Concurrent"),
-		bencher.NewSearcher("Meta"),
-		bencher.NewSearcher("Confident"),
+		//bencher.NewSearcher("Meta"),
+		//bencher.NewSearcher("Confident"),
 	}
 	searchers[0].SetFun(mcs.ConcurrentSearch)
-	searchers[1].SetFun(mcs.MetaSearch)
-	searchers[2].SetFun(mcs.ConfidentSearch)
+	//searchers[1].SetFun(mcs.MetaSearch)
+	//searchers[2].SetFun(mcs.ConfidentSearch)
 
 	// 1...
 	policies := []mcs.GamePolicy{
@@ -69,7 +69,7 @@ func TestSameGameStandardSet(t *testing.T) {
 	}
 
 	durations := []time.Duration{
-		2 * time.Minute,
+		20 * time.Minute,
 		//20 * time.Minute,
 		//40 * time.Minute,
 		//60 * time.Minute,

@@ -7,7 +7,6 @@
 package mcs
 
 import (
-	"log"
 	"runtime"
 	"sync"
 	"time"
@@ -141,7 +140,6 @@ conclusion:
 // more samplers than other kinds of goroutine: the assumption is that loading up the pipeline
 // with simulation will eventually reduce dead time in walkers and updaters.
 func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, outcome chan<- job) {
-	log.Println("sampler up")
 
 	for task := range position {
 		node, decision := task.node, task.decision
@@ -158,7 +156,7 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 		case walked:
 			node.SetStatus(simulating)
 		default:
-			//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
+			//log.Printf("simulating %v node %d\n", node.Status(), node.Status())
 			//continue
 		}
 
@@ -166,7 +164,6 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 
 		select {
 		case <-done:
-			log.Println("sampler done")
 			return
 		case outcome <- job{node, sampled}:
 			node.SetStatus(simulated)
@@ -177,12 +174,10 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 // An updater is asynchronously back propagating scores received from simulating.
 // It computes UCB values along the way.
 func updater(done <-chan struct{}, outcome <-chan job) {
-	log.Println("updater up")
 
 	for outcome := range outcome {
 		select {
 		case <-done:
-			log.Println("updater done")
 			return
 		default:
 			node, decision := outcome.node, outcome.decision
@@ -198,8 +193,6 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 // A walker share the very same logic as UCT: it realizes selections and expansions of nodes.
 // It chooses moves to address the dilemma between exploration or exploitation.
 func walker(done <-chan struct{}, root *Node, position chan<- job) {
-	log.Println("walker up")
-
 	var out chan<- job
 
 	for {
@@ -232,7 +225,6 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 
 		select {
 		case <-done:
-			log.Println("walker done")
 			return
 		case out <- job{node, Decision{score: score, moves: moves}}:
 			// pass along if channel is activated
