@@ -45,10 +45,10 @@ func (g GameState) String() string {
 	return samegame.State(g).String()
 }
 
-// Move is scorable, has a length and is printable.
+// Move has a length, is scorable and printable.
 type Move interface {
-	Score() float64
 	Len() int
+	Score() float64
 	String() string
 }
 
