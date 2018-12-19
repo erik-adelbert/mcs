@@ -25,7 +25,7 @@ import (
 const (
 	KB = 1024
 
-	defaultTimeout = 5 * time.Minute // This program has in +/- 10ms accuracy due to its structure.
+	defaultTimeout = 10 * time.Minute // This program has in +/- 10ms accuracy due to its structure.
 
 	ε = 0.03 // ε-greedy
 

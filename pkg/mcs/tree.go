@@ -10,10 +10,15 @@ package mcs
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strings"
 )
+
+// VisitThreshold is the minimal number of simulations a position has to go through
+// before being registered in the tree as a node.
+const VisitThreshold = 8
 
 var nodeCounter struct {
 	Spinlock
@@ -96,6 +101,7 @@ const (
 	walked
 	simulating
 	simulated
+	null
 )
 
 func (ns NodeStatus) String() string {
@@ -108,6 +114,8 @@ func (ns NodeStatus) String() string {
 		return "simulated"
 	case simulating:
 		return "simulating"
+	case null:
+		return "nil"
 	default:
 		return "unknown"
 	}
@@ -227,7 +235,7 @@ func (n *Node) Down() []*Node {
 }
 
 // Downselect chooses next edge using linear ε-greedy algorithm:
-// It chooses a random node with probability 1-ε/n
+// It chooses a random node with probability ε and uses UCB with probability 1-ε
 // see https://arxiv.org/pdf/1402.6028.pdf
 func (n *Node) Downselect() *Node {
 
@@ -251,21 +259,23 @@ func (n *Node) Downselect() *Node {
 		for _, node = range n.down {
 			if node.GetLock() {
 				status := node.status
-				//solved := node.IsSolvedUnsafe()
 				node.Unlock()
-				//if status == idle && !solved {
 				if status == idle {
-					break
+					// next time, if possible, choose another one :
+					// status will eventually be reset by updater
+					n.value = math.Inf(-1)
+					goto found
 				}
 			}
 		}
+		node = n.down[rand.Intn(len(n.down))]
+		log.Printf("downselect: no idle node randomly chosen %p\n", node)
 
-		// next time, if possible, expand another one :
-		// status will eventually be reset by updater
-		n.value = math.Inf(-1)
-		// n.status = walked
+	found:
 	}
 	n.Unlock()
+
+	//log.Printf("downselect: %p\n", node)
 
 	return node
 }
@@ -310,6 +320,8 @@ func (n *Node) ExpandOne(move Move) *Node {
 	}
 	n.Unlock()
 
+	//log.Printf("expand: %p\n", node)
+
 	return node
 }
 
@@ -343,6 +355,9 @@ func (n *Node) Hand() MoveSet {
 // IsExpanded states if whether or not all the legal moves
 // of the calling node have been expanded in the tree.
 func (n *Node) IsExpanded() bool {
+	if n == nil {
+		return false
+	}
 
 	n.Lock()
 	defer n.Unlock()
@@ -351,8 +366,11 @@ func (n *Node) IsExpanded() bool {
 	}
 }
 
-// IsLeaf states if the calling node has no child.
-func (n *Node) IsLeaf() bool {
+// IsFringe states if whether or not the calling node is a leaf.
+func (n *Node) IsFringe() bool {
+	if n == nil {
+		return false
+	}
 
 	n.Lock()
 	defer n.Unlock()
@@ -379,6 +397,9 @@ func (n *Node) IsSolvedUnsafe() bool {
 // IsTerminal is true if the calling node is the second to
 // last move of a game.
 func (n *Node) IsTerminal() bool {
+	if n == nil {
+		return false
+	}
 
 	n.Lock()
 	defer n.Unlock()
@@ -444,6 +465,10 @@ func (n *Node) State() GameState {
 
 // Status is a safe getter.
 func (n *Node) Status() NodeStatus {
+
+	if n == nil {
+		return null
+	}
 
 	n.Lock()
 	defer n.Unlock()

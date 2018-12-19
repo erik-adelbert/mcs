@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-// VisitThreshold is the minimal number of simulations a position has to go through
-// before being registered in the tree as a node.
-const VisitThreshold = 8
-
 // The minimum number of walkers is 2 while there are always as many updaters and
 // twice more samplers.
 func numGoRoutines() int {
@@ -52,14 +48,14 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 		panic("no root")
 	}
 
-	// All possible first moves are expanded
+	// All possible moves are expanded as first move
 	tree := GrowTree(root)
 
 	done := make(chan struct{})
 	timeout := make(chan bool)
 
 	// Start the countdown asap: the search must return a decision
-	// in the given time frame. A late decision is as good as an
+	// in the given time frame. A late decision is as bad as an
 	// illegal move, it's disqualifying.
 	go func() {
 		time.Sleep(duration)
@@ -155,9 +151,10 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 		switch node.Status() {
 		case walked:
 			node.SetStatus(simulating)
+			//log.Printf("sampler: %v node %p\n", node.Status(), node)
 		default:
-			//log.Printf("simulating %v node %d\n", node.Status(), node.Status())
-			//continue
+			//log.Printf("sampler: discarding already %v node %p\n", node.Status(), node)
+			continue
 		}
 
 		sampled := decision.Join(state.Sample(done, policies[0]))
@@ -183,8 +180,11 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 			node, decision := outcome.node, outcome.decision
 			//if node != nil && (node.Status() != simulated && node.Status() != simulating) {
 			if node != nil {
+				//log.Printf("updater: updating %v node %p", node.Status(), node)
 				node.UpdateTree(decision)
 				node.SetStatus(idle)
+			} else {
+				//log.Printf("updater: discarding %v node %p", node.Status(), node)
 			}
 		}
 	}
@@ -203,7 +203,9 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		node := root
 
 		for node.IsExpanded() {
-			node = node.Downselect()
+			if node = node.Downselect(); node == nil {
+				break
+			}
 
 			move := node.Edge()
 			moves = moves.Enqueue(move)
@@ -213,14 +215,19 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		if !node.IsTerminal() && node.Visits() > VisitThreshold {
 			node = node.ExpandOne(node.RandomNewEdge())
 
+			//log.Printf("walker: expanded %v node %p\n", node.Status(), node)
+
 			move := node.Edge()
 			moves = moves.Enqueue(move)
 			score += move.Score()
 		}
 
 		if node != nil {
-			node.SetStatus(walked)
 			out = position // activate channel
+			node.SetStatus(walked)
+		} else {
+			runtime.Gosched()
+			continue
 		}
 
 		select {
@@ -228,8 +235,6 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 			return
 		case out <- job{node, Decision{score: score, moves: moves}}:
 			// pass along if channel is activated
-		default:
-			// continue
 		}
 	}
 }
