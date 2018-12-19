@@ -20,7 +20,7 @@ const VisitThreshold = 8
 // The minimum number of walkers is 2 while there are always as many updaters and
 // twice more samplers.
 func numGoRoutines() int {
-	switch n := runtime.NumCPU() / 6; n {
+	switch n := runtime.NumCPU() / 8; n {
 	case 0:
 		return 2
 	default:
@@ -30,7 +30,7 @@ func numGoRoutines() int {
 
 var walkers = numGoRoutines()
 var updaters = walkers
-var samplers = walkers // samplers are the slowest
+var samplers = 2 * walkers // samplers are the slowest
 
 // Jobs convey nodes and best moves between mcts steps (ie. walkers, samplers and updaters).
 type job struct {
@@ -113,9 +113,9 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 	}
 
 	// Launch!
-	update(updaters)
-	sample(samplers)
-	walk(walkers)
+	go update(updaters)
+	go sample(samplers)
+	go walk(walkers)
 
 	// Wait for either timeout or solution
 	for {
@@ -126,6 +126,7 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 			if root.IsSolved() {
 				goto conclusion
 			}
+			runtime.Gosched()
 		}
 	}
 
@@ -136,121 +137,39 @@ conclusion:
 	return tree.Best()
 }
 
-/*
-func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, outcome chan<- job) {
-	for {
-		select {
-		case <-done:
-			return
-		case task := <-position:
-			node, decision := task.node, task.decision
-
-			if node == nil {
-				continue
-			}
-
-			//if !node.IsSolved() {
-			node.Lock()
-			state := node.state.Clone()
-			node.Unlock()
-
-			switch node.Status() {
-			case walked:
-				node.SetStatus(simulating)
-			default:
-				//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
-				//continue
-			}
-
-			chans := make([]<-chan job, 0, len(policies))
-			for _, policy := range policies {
-				out := make(chan job, 1)
-
-				start := state.Clone()
-				simulated := decision.Clone()
-
-				go func(policy GamePolicy, start GameState, local Decision) { // go simulate
-					defer close(out)
-
-					simulated = simulated.Join(start.Sample(done, policy, 1.0/float64(len(policies))))
-
-					select {
-					case <-done:
-						return
-					case out <- job{node, simulated}:
-					}
-				}(policy, start, simulated)
-
-				chans = append(chans, out)
-			}
-
-			// Fan-in :
-			var wg sync.WaitGroup
-
-			output := func(in <-chan job) {
-				defer wg.Done()
-
-				for task := range in {
-					select {
-					case <-done:
-						return
-					case outcome <- task: // pass along to updating
-					}
-				}
-			}
-
-			wg.Add(len(chans))
-			for _, c := range chans {
-				go output(c)
-			}
-			wg.Wait()
-			node.SetStatus(simulated)
-			//} else {
-			//	node.SetStatus(simulated)
-			//	outcome <- job{node, node.Best()}
-		}
-	}
-}
-*/
-
 // A sampler is the slowest performer of the asynchronous pipeline. This is why there are twice
 // more samplers than other kinds of goroutine: the assumption is that loading up the pipeline
 // with simulation will eventually reduce dead time in walkers and updaters.
 func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, outcome chan<- job) {
 	log.Println("sampler up")
 
-	for {
+	for task := range position {
+		node, decision := task.node, task.decision
+
+		if node == nil {
+			continue
+		}
+
+		node.Lock()
+		state := node.state.Clone()
+		node.Unlock()
+
+		switch node.Status() {
+		case walked:
+			node.SetStatus(simulating)
+		default:
+			//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
+			//continue
+		}
+
+		sampled := decision.Join(state.Sample(done, policies[0]))
+
 		select {
 		case <-done:
 			log.Println("sampler done")
 			return
-		case task := <-position:
-			node, decision := task.node, task.decision
-
-			if node == nil {
-				continue
-			}
-
-			node.Lock()
-			state := node.state.Clone()
-			node.Unlock()
-
-			switch node.Status() {
-			case walked:
-				node.SetStatus(simulating)
-			default:
-				//fmt.Printf("simulating %v node %d\n", node.Status(), node.Status())
-				//continue
-			}
-
-			sampled := decision.Join(state.Sample(done, policies[0]))
-
-			select {
-			case <-done:
-				return
-			case outcome <- job{node, sampled}:
-				node.SetStatus(simulated)
-			}
+		case outcome <- job{node, sampled}:
+			node.SetStatus(simulated)
 		}
 	}
 }
@@ -260,12 +179,12 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 func updater(done <-chan struct{}, outcome <-chan job) {
 	log.Println("updater up")
 
-	for {
+	for outcome := range outcome {
 		select {
 		case <-done:
 			log.Println("updater done")
 			return
-		case outcome := <-outcome:
+		default:
 			node, decision := outcome.node, outcome.decision
 			//if node != nil && (node.Status() != simulated && node.Status() != simulating) {
 			if node != nil {
@@ -281,39 +200,44 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 func walker(done <-chan struct{}, root *Node, position chan<- job) {
 	log.Println("walker up")
 
-	for {
-		select {
+	var out chan<- job
 
+	for {
+		var score float64
+		var moves MoveSequence
+
+		out = nil
+		node := root
+
+		for node.IsExpanded() {
+			node = node.Downselect()
+
+			move := node.Edge()
+			moves = moves.Enqueue(move)
+			score += move.Score()
+		}
+
+		if !node.IsTerminal() && node.Visits() > VisitThreshold {
+			node = node.ExpandOne(node.RandomNewEdge())
+
+			move := node.Edge()
+			moves = moves.Enqueue(move)
+			score += move.Score()
+		}
+
+		if node != nil {
+			node.SetStatus(walked)
+			out = position // activate channel
+		}
+
+		select {
 		case <-done:
 			log.Println("walker done")
 			return
-
+		case out <- job{node, Decision{score: score, moves: moves}}:
+			// pass along if channel is activated
 		default:
-			var score float64
-			var moves MoveSequence
-
-			node := root
-
-			for node.IsExpanded() {
-				node = node.Downselect()
-
-				move := node.Edge()
-				moves = moves.Enqueue(move)
-				score += move.Score()
-			}
-
-			if !node.IsTerminal() && node.Visits() > VisitThreshold {
-				node = node.ExpandOne(node.RandomNewEdge())
-
-				move := node.Edge()
-				moves = moves.Enqueue(move)
-				score += move.Score()
-			}
-
-			if node != nil {
-				node.SetStatus(walked)
-				position <- job{node, Decision{score: score, moves: moves}} // pass along to simulating
-			}
+			// continue
 		}
 	}
 }
