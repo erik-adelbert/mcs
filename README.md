@@ -29,4 +29,4 @@ $ make bench
 See the [up to date documentation.](https://godoc.org/github.com/erik-adelbert/mcs/pkg/mcs)\
 See also the [Clickomania/Samegame boardgame engine documentation.](https://godoc.org/github.com/erik-adelbert/mcs/pkg/game)
 
-**_This is an experimental setup which is currently studied. Do not use for production purposes._**
+**_This is an experimental setup which is currently being studied. Do not use for production purposes._**
