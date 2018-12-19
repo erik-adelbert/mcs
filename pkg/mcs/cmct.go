@@ -20,7 +20,7 @@ const VisitThreshold = 8
 // The minimum number of walkers is 2 while there are always as many updaters and
 // twice more samplers.
 func numGoRoutines() int {
-	switch n := runtime.NumCPU() / 8; n {
+	switch n := runtime.NumCPU() / 6; n {
 	case 0:
 		return 2
 	default:
@@ -30,7 +30,7 @@ func numGoRoutines() int {
 
 var walkers = numGoRoutines()
 var updaters = walkers
-var samplers = 2 * walkers // samplers are the slowest
+var samplers = walkers // samplers are the slowest
 
 // Jobs convey nodes and best moves between mcts steps (ie. walkers, samplers and updaters).
 type job struct {
