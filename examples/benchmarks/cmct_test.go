@@ -55,7 +55,7 @@ func TestSameGameStandardSet(t *testing.T) {
 	}
 
 	constants := []struct{ ε, C, W float64 }{
-		{0.03, 1000, 0},
+		//{0.03, 1000, 0},
 		{0.03, 40, 0},
 		//{0.03, 40, 0.2},
 	}
@@ -96,12 +96,13 @@ func TestSameGameStandardSet(t *testing.T) {
 						t.Fatal(err)
 					}
 
+					flusher(logger)
+
 					// Force memory recuperation before next iteration
 					runtime.GC()
 				}
-				close(logfile)
+				closer(logfile)
 			}
-
 		}
 	}
 
@@ -124,8 +125,14 @@ func readln(reader *bufio.Reader) string {
 	return string(s)
 }
 
-func close(file *os.File) {
+func closer(file *os.File) {
 	if err := file.Close(); err != nil {
+		panic(err)
+	}
+}
+
+func flusher(writer *bufio.Writer) {
+	if err := writer.Flush(); err != nil {
 		panic(err)
 	}
 }
