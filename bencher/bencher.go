@@ -20,13 +20,13 @@ type Benchmark struct {
 	out  *log.Logger
 }
 
-func NewBenchmark(name string, duration time.Duration, logfile io.Writer) (*Benchmark, error) {
+func NewBenchmark(name string, duration time.Duration, logfile io.Writer) *Benchmark {
 	const KB = 1024
 
 	writer := bufio.NewWriterSize(logfile, 1*KB)
 	out := log.New(writer, name, 0)
 
-	return &Benchmark{Duration: duration, name: name, out: out}, nil
+	return &Benchmark{Duration: duration, name: name, out: out}
 }
 
 func (b *Benchmark) Attach(game *Game) {
@@ -60,7 +60,7 @@ func (b *Benchmark) Run() error {
 	}
 	elapsed := time.Since(start)
 
-	b.out.Println(" ", mcs.Search(fun).String(), elapsed, game.Name(), mcs.NodeCount(), result)
+	b.out.Println(" ", mcs.Search(fun).String(), game.Name(), elapsed, mcs.NodeCount(), result)
 
 	return nil
 }

@@ -7,6 +7,7 @@
 package mcs
 
 import (
+	"log"
 	"runtime"
 	"sync"
 	"time"
@@ -112,9 +113,9 @@ func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration)
 	}
 
 	// Launch!
-	go walk(walkers)
-	go sample(samplers)
-	go update(updaters)
+	update(updaters)
+	sample(samplers)
+	walk(walkers)
 
 	// Wait for either timeout or solution
 	for {
@@ -216,9 +217,12 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 // more samplers than other kinds of goroutine: the assumption is that loading up the pipeline
 // with simulation will eventually reduce dead time in walkers and updaters.
 func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, outcome chan<- job) {
+	log.Println("sampler up")
+
 	for {
 		select {
 		case <-done:
+			log.Println("sampler done")
 			return
 		case task := <-position:
 			node, decision := task.node, task.decision
@@ -254,9 +258,12 @@ func sampler(done <-chan struct{}, policies []GamePolicy, position <-chan job, o
 // An updater is asynchronously back propagating scores received from simulating.
 // It computes UCB values along the way.
 func updater(done <-chan struct{}, outcome <-chan job) {
+	log.Println("updater up")
+
 	for {
 		select {
 		case <-done:
+			log.Println("updater done")
 			return
 		case outcome := <-outcome:
 			node, decision := outcome.node, outcome.decision
@@ -272,11 +279,13 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 // A walker share the very same logic as UCT: it realizes selections and expansions of nodes.
 // It chooses moves to address the dilemma between exploration or exploitation.
 func walker(done <-chan struct{}, root *Node, position chan<- job) {
+	log.Println("walker up")
 
 	for {
 		select {
 
 		case <-done:
+			log.Println("walker done")
 			return
 
 		default:

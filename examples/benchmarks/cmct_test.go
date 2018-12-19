@@ -9,11 +9,13 @@ package benchmark
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"math/rand"
 	"mcs/bencher"
 	"mcs/games/samegame"
 	"mcs/pkg/mcs"
-	//_ "net/http/pprof"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"strconv"
@@ -29,11 +31,9 @@ const (
 
 func TestSameGameStandardSet(t *testing.T) {
 
-	/*
-		go func() {
-			log.Println(http.ListenAndServe("localhost:6060", nil)) // 3...
-		}()
-	*/
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil)) // 3...
+	}()
 
 	problems := make([]*bencher.Problem, 0, 20)
 
@@ -96,7 +96,7 @@ func TestSameGameStandardSet(t *testing.T) {
 					game.SetS(searcher)
 
 					name := logname + "_" + problem.Name()
-					benchmark, _ := bencher.NewBenchmark(name, duration, logger)
+					benchmark := bencher.NewBenchmark(name, duration, logger)
 					benchmark.Duration = duration
 					benchmark.Attach(game)
 

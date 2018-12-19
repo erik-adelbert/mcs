@@ -13,7 +13,6 @@ import (
 	"math"
 	"math/rand"
 	"strings"
-	"time"
 )
 
 var nodeCounter struct {
@@ -49,8 +48,8 @@ func NodeCountReset() {
 }
 
 // NodeRate returns the nodes creation rate on a 10s window.
-var NodeRate = nodometer()
-
+//var NodeRate = nodometer()
+/*
 func nodometer() func() float64 {
 	lock := NewSpinlock()
 
@@ -84,6 +83,7 @@ func nodometer() func() float64 {
 		return count / elapsed
 	}
 }
+*/
 
 // NodeStatus reflects the cycle of nodes during Monte-Carlo Searches.
 // A node is either up to date (Idle), or went through selection/expansion step (Walked),
