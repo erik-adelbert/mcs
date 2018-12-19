@@ -99,6 +99,7 @@ func TestSameGameStandardSet(t *testing.T) {
 					// Force memory recuperation before next iteration
 					runtime.GC()
 				}
+				close(logfile)
 			}
 
 		}
@@ -123,11 +124,18 @@ func readln(reader *bufio.Reader) string {
 	return string(s)
 }
 
+func close(file *os.File) {
+	if err := file.Close(); err != nil {
+		panic(err)
+	}
+}
+
 func load(name string) mcs.GameState {
 	file, err := os.Open(name)
 	if err != nil {
 		panic(err)
 	}
+	defer close(file)
 
 	const KB = 1024
 

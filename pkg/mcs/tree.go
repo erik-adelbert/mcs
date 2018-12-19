@@ -40,6 +40,14 @@ func NodeCount() int {
 	return count
 }
 
+func NodeCountReset() {
+	nodeCounter.Lock()
+	{
+		nodeCounter.value = 0
+	}
+	nodeCounter.Unlock()
+}
+
 // NodeRate returns the nodes creation rate on a 10s window.
 var NodeRate = nodometer()
 
