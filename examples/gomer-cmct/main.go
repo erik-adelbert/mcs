@@ -63,7 +63,7 @@ func main() {
 	var timeout = defaultTimeout
 	if len(*duration) > 0 {
 		duration, err := time.ParseDuration(*duration)
-		if err != nil {
+		if err == nil {
 			timeout = duration
 		}
 	}
