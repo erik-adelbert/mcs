@@ -96,10 +96,9 @@ func TestSameGameStandardSet(t *testing.T) {
 						t.Fatal(err)
 					}
 
+					benchmark.Detach()
 					flusher(logger)
-
-					// Force memory recuperation before next iteration
-					runtime.GC()
+					runtime.GC() // Force memory recuperation before next iteration
 				}
 				closer(logfile)
 			}
@@ -142,7 +141,7 @@ func load(name string) mcs.GameState {
 	if err != nil {
 		panic(err)
 	}
-	defer close(file)
+	defer closer(file)
 
 	const KB = 1024
 
