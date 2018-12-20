@@ -193,13 +193,12 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 // A walker share the very same logic as UCT: it realizes selections and expansions of nodes.
 // It chooses moves to address the dilemma between exploration or exploitation.
 func walker(done <-chan struct{}, root *Node, position chan<- job) {
-	var out chan<- job
 
 	for {
 		var score float64
 		var moves MoveSequence
+		var outch chan<- job = nil
 
-		out = nil
 		node := root
 
 		for node.IsExpanded() {
@@ -223,7 +222,7 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		}
 
 		if node != nil {
-			out = position // activate channel
+			outch = position // enable channel see https://golang.org/ref/spec#Channel_types
 			node.SetStatus(walked)
 		} else {
 			runtime.Gosched()
@@ -233,8 +232,9 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		select {
 		case <-done:
 			return
-		case out <- job{node, Decision{score: score, moves: moves}}:
-			// pass along if channel is activated
+		case outch <- job{node, Decision{score: score, moves: moves}}:
+			// pass along if channel is enable (not nil), block if you have to.
+			// from the spec: A nil channel is never ready for communication.
 		}
 	}
 }
