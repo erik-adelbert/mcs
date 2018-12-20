@@ -178,7 +178,6 @@ func updater(done <-chan struct{}, outcome <-chan job) {
 			return
 		default:
 			node, decision := outcome.node, outcome.decision
-			//if node != nil && (node.Status() != simulated && node.Status() != simulating) {
 			if node != nil {
 				//log.Printf("updater: updating %v node %p", node.Status(), node)
 				node.UpdateTree(decision)
@@ -202,9 +201,7 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		node := root
 
 		for node.IsExpanded() {
-			if node = node.Downselect(); node == nil {
-				break
-			}
+			node = node.Downselect()
 
 			move := node.Edge()
 			moves = moves.Enqueue(move)
@@ -233,7 +230,7 @@ func walker(done <-chan struct{}, root *Node, position chan<- job) {
 		case <-done:
 			return
 		case outch <- job{node, Decision{score: score, moves: moves}}:
-			// pass along if channel is enable (not nil), block if you have to.
+			// pass along if channel is enable (not nil), block on channel if necessary.
 			// from the spec: A nil channel is never ready for communication.
 		}
 	}
