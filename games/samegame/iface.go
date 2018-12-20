@@ -152,7 +152,11 @@ func (sg State) Sample(done <-chan struct{}, policy ColorPolicy) (float64, Seque
 func (sg State) Score() float64 {
 	penalty, bonus := 0.0, 0.0
 	for _, n := range SameBoard(sg).h {
-		penalty += n * n
+		if n == 1 {
+			//penalty += 1000
+		} else {
+			penalty += n * n
+		}
 	}
 	if penalty == 0 {
 		bonus = 1000

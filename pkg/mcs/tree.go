@@ -242,7 +242,10 @@ func (n *Node) Downselect() *Node {
 	p := 1.0
 	if v := n.Visits(); v > 0 {
 		p = n.ε
-		//p = (1 - 1/math.Log(10+(v/200))) / 2 // ε-greedy logarithmic rise: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21
+
+		// anti ε-greedy, entropy reduction by logarithmic rise: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21
+		// tests are disappointing but the idea isn't bad
+		// p = (1 - 1/math.Log(10+(v/200))) / 2
 	}
 
 	var node *Node
@@ -256,6 +259,7 @@ func (n *Node) Downselect() *Node {
 			rand.Shuffle(len(n.down), swap)
 		}
 
+		// look for an idle node
 		for _, node = range n.down {
 			if node.GetLock() {
 				status := node.status
@@ -268,11 +272,12 @@ func (n *Node) Downselect() *Node {
 				}
 			}
 		}
+		// not found:
 		node = n.down[rand.Intn(len(n.down))]
 		n.ε *= 2
-		log.Printf("downselect: no idle node randomly chosen %p over %d, entropy reduction\n", node, len(n.down))
+		log.Printf("downselect: no idle node available, randomly chosen %p over %d and reduced entropy\n", node, len(n.down))
 
-	found:
+	found: // do nothing more
 	}
 	n.Unlock()
 
