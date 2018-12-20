@@ -241,8 +241,8 @@ func (n *Node) Downselect() *Node {
 
 	p := 1.0
 	if v := n.Visits(); v > 0 {
-		//p = n.ε
-		p = (1 - 1/math.Log(10+(v/200))) / 2 // ε-greedy logarithmic rise: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21
+		p = n.ε
+		//p = (1 - 1/math.Log(10+(v/200))) / 2 // ε-greedy logarithmic rise: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21
 	}
 
 	var node *Node
@@ -269,7 +269,8 @@ func (n *Node) Downselect() *Node {
 			}
 		}
 		node = n.down[rand.Intn(len(n.down))]
-		log.Printf("downselect: no idle node randomly chosen %p over %d\n", node, len(n.down))
+		n.ε *= 2
+		log.Printf("downselect: no idle node randomly chosen %p over %d, entropy reduction\n", node, len(n.down))
 
 	found:
 	}
