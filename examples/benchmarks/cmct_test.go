@@ -69,7 +69,7 @@ func TestSameGameStandardSet(t *testing.T) {
 	}
 
 	durations := []time.Duration{
-		20 * time.Minute,
+		40 * time.Minute,
 		//20 * time.Minute,
 		//40 * time.Minute,
 		//60 * time.Minute,
