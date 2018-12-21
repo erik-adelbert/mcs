@@ -1,5 +1,5 @@
 # mcs
-mcs is a package implementing CMCT, a Concurrent Monte-Carlo Search for Tree akin to a concurrent UCT.
+mcs is a Golang package implementing CMCT, a Concurrent Monte-Carlo Search for Trees akin to a concurrent UCT.
 
 ```bash 
 $ cd go/src
