@@ -31,16 +31,16 @@ func TestColor_AnsiString(t *testing.T) {
 	}
 
 	red := Red
-	if s := red.AnsiString("Red"); strings.Compare(s, string(r)) != 0 {
+	if s := red.AnsiColoredString("Red"); strings.Compare(s, string(r)) != 0 {
 		t.Errorf("ansistring: wanted %s, got %s", string(r), s)
 	}
 
 	green := Green
-	if s := green.AnsiString("Green"); strings.Compare(s, string(g)) != 0 {
+	if s := green.AnsiColoredString("Green"); strings.Compare(s, string(g)) != 0 {
 		t.Errorf("ansistring: wanted %s, got %s", string(g), s)
 	}
 
-	t.Log(red.AnsiString("Red"), green.AnsiString("Green"))
+	t.Log(red.AnsiColoredString("Red"), green.AnsiColoredString("Green"))
 }
 
 func TestColor_String(t *testing.T) {

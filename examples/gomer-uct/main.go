@@ -130,7 +130,7 @@ func replay(writer *bufio.Writer, b samegame.SameBoard, solution mcs.Decision) {
 		color := b.TileColor(game.Tile(tile))
 		b = b.Remove(game.Tile(tile))
 
-		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiString(tile.String())))
+		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiColoredString(tile.String())))
 		writeln(writer, b.String())
 	}
 }

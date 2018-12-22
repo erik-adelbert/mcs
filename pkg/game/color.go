@@ -20,7 +20,7 @@ const (
 	AllColors
 )
 
-// NewColor encodes string characters into colors
+// NewColor encodes characters into colors
 func NewColor(b int32) Color {
 	switch b {
 	case 'R':
@@ -42,59 +42,58 @@ func NewColor(b int32) Color {
 	}
 }
 
-// AnsiString returns a colorized string by embedding ansi color escape codes.
-func (c Color) AnsiString(s string) string {
-	var code string
+type ansiColorCode string
 
-	switch c {
-	default:
+var lut = map[Color]ansiColorCode{
+	Red:    "1",
+	Green:  "28",
+	Yellow: "3",
+	Blue:   "6",
+	Violet: "128",
+	Indigo: "20",
+	Orange: "202",
+}
+
+func ansiColorEscape(color ansiColorCode) string {
+	return "\033[38;5;" + string(color) + "m"
+}
+
+const ansiColorReset = "\033[0m"
+
+// AnsiColoredString returns a colorized string by embedding ansi color escape codes.
+func (c Color) AnsiColoredString(s string) string {
+	var code ansiColorCode
+
+	code, ok := lut[c]
+	if !ok { // Color doesn't exist in the lookup table.
 		return s
-	case Red:
-		code = "1"
-	case Green:
-		code = "28"
-	case Yellow:
-		code = "3"
-	case Blue:
-		code = "6"
-	case Violet:
-		code = "128"
-	case Indigo:
-		code = "20"
-	case Orange:
-		code = "202"
 	}
-	ansiColor := "\033[38;5;" + code + "m"
-	ansiReset := "\033[0m"
 
-	return ansiColor + s + ansiReset
+	return ansiColorEscape(code) + s + ansiColorReset
 }
 
 // This stringer prints an ansi-colorized letter.
 func (c Color) String() string {
-	var code, ch string
+	var s string
 
 	switch c {
 	default:
 		return "-"
 	case Red:
-		ch, code = "R", "1"
+		s = "R"
 	case Green:
-		ch, code = "G", "28"
+		s = "G"
 	case Yellow:
-		ch, code = "Y", "3"
+		s = "Y"
 	case Blue:
-		ch, code = "B", "6"
+		s = "B"
 	case Violet:
-		ch, code = "V", "128"
+		s = "V"
 	case Indigo:
-		ch, code = "I", "20"
+		s = "I"
 	case Orange:
-		ch, code = "O", "202"
+		s = "O"
 	}
 
-	ansiColor := "\033[38;5;" + code + "m"
-	ansiReset := "\033[0m"
-
-	return ansiColor + ch + ansiReset
+	return c.AnsiColoredString(s)
 }
