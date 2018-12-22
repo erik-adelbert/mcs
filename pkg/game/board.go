@@ -188,7 +188,7 @@ func (b Board) Remove(t Tile) Board {
 	// 2 - Deleted blocks and empty columns are removed while transposing.
 	trans := shrink(NewBoard(w, h))
 	for last, j := 0, 0; j < w; j++ {
-		trans = trans[:last+1] // ExpandOne by one row
+		trans = trans[:last+1] // Expand by one row
 
 		empty := true
 		for i := 0; i < h; i++ { // Dump deleted blocks
@@ -217,7 +217,7 @@ func (b Board) Remove(t Tile) Board {
 
 	b = shrink(b) // Reuse already allocated storage
 	for last, i := 0, 0; i < h; i++ {
-		b = b[:last+1] // ExpandOne by one row
+		b = b[:last+1] // Expand by one row
 
 		empty := true
 		for j := 0; j < w; j++ {
