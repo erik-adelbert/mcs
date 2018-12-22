@@ -169,9 +169,9 @@ func shrink(b Board) Board {
 
 // Remove a tile from the board.
 // The resulting board is built in three phases:
-//   1) board blocks composing the tile are marked deleted;
-//   2) a transposed matrix is built with no deleted block nor shrink column;
-//	 3) this matrix is transposed back with no shrink row.
+//	1) board blocks composing the tile are marked deleted;
+//	2) a transposed matrix is built with no deleted block nor shrink column;
+//	3) this matrix is transposed back with no shrink row.
 // This emulates perfectly the physics of clickomania.
 func (b Board) Remove(t Tile) Board {
 	h, w := b.Dims()
@@ -185,7 +185,7 @@ func (b Board) Remove(t Tile) Board {
 		b[block.r][block.c] = NoColor
 	}
 
-	// 2 - Deleted blocks and shrink columns are removed while transposing.
+	// 2 - Deleted blocks and empty columns are removed while transposing.
 	trans := shrink(NewBoard(w, h))
 	for last, j := 0, 0; j < w; j++ {
 		trans = trans[:last+1] // ExpandOne by one row
@@ -198,7 +198,7 @@ func (b Board) Remove(t Tile) Board {
 			}
 		}
 
-		if empty { // Last column was shrink: reuse storage!
+		if empty { // Last column was empty: reuse storage!
 			trans[last] = trans[last][:0] // Flush row
 			trans = trans[:last]          // Retract row
 			continue
@@ -212,7 +212,7 @@ func (b Board) Remove(t Tile) Board {
 		last++
 	}
 
-	// 3 - Transpose back while deleting shrink rows
+	// 3 - Transpose back while deleting empty rows
 	w, h = trans.Dims()
 
 	b = shrink(b) // Reuse already allocated storage
@@ -225,7 +225,7 @@ func (b Board) Remove(t Tile) Board {
 			b[last] = append(b[last], trans[j][i])
 		}
 
-		if empty { // Last row was shrink: reuse storage!
+		if empty { // Last row was empty: reuse storage!
 			b[last] = b[last][:0]
 			b = b[:last]
 			continue
