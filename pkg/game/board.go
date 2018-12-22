@@ -171,7 +171,7 @@ func shrink(b Board) Board {
 // The resulting board is built in three phases:
 //	1) board blocks composing the tile are marked deleted;
 //	2) a transposed matrix is built with no deleted block nor shrink column;
-//	3) this matrix is transposed back with no shrink row.
+//	3) this matrix is transposed back with no empty row.
 // This emulates perfectly the physics of clickomania.
 func (b Board) Remove(t Tile) Board {
 	h, w := b.Dims()
