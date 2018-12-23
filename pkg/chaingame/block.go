@@ -6,21 +6,21 @@ package chaingame
 
 import "fmt"
 
-// A Block is a board cell.
-type Block struct {
+// A block is a board cell.
+type block struct {
 	r, c int
 }
 
 // Column is an obvious getter.
-func (b Block) Column() int {
+func (b block) Column() int {
 	return b.c
 }
 
 // Row is an obvious getter.
-func (b Block) Row() int {
+func (b block) Row() int {
 	return b.r
 }
 
-func (b Block) String() string {
+func (b block) String() string {
 	return fmt.Sprintf("(%d,%d)", b.r, b.c)
 }

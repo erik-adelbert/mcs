@@ -21,7 +21,7 @@ import (
 const VisitThreshold = 8
 
 var nodeCounter struct {
-	Spinlock
+	spinlock
 	value int
 }
 
@@ -56,7 +56,7 @@ func NodeCountReset() {
 //var NodeRate = nodometer()
 /*
 func nodometer() func() float64 {
-	lock := NewSpinlock()
+	lock := newSpinlock()
 
 	last := 0
 	t0 := time.Now()
@@ -123,7 +123,7 @@ func (ns NodeStatus) String() string {
 
 // Node composes a multi-branching tree asymptotically akin to mini-max tree.
 type Node struct {
-	*Spinlock
+	*spinlock
 
 	edge   Move
 	depth  int
@@ -197,7 +197,7 @@ func NewNode(up *Node, edge Move, state GameState, hand MoveSet, ε, c, w float6
 		w: w,
 	}
 
-	node.Spinlock = NewSpinlock()
+	node.spinlock = newSpinlock()
 
 	return &node
 }
@@ -250,7 +250,7 @@ func (n *Node) Downselect() *Node {
 	n.Lock()
 	{
 		if rand.Float64() > p { // selection by value
-			By(Value).SortDescending(n.down)
+			by(value).sortDescending(n.down)
 		} else { // ε-greedy
 			swap := func(i, j int) { n.down[i], n.down[j] = n.down[j], n.down[i] }
 			rand.Shuffle(len(n.down), swap)
@@ -604,7 +604,7 @@ func (n *Node) UpdateTree(decision Decision) {
 	}
 }
 
-// Value returns the calling node's search score.
+// value returns the calling node's search score.
 func (n *Node) Value() float64 {
 	n.Lock()
 	defer n.Unlock()

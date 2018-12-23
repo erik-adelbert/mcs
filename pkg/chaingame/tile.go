@@ -11,7 +11,7 @@ import (
 
 type (
 	// A Tile is a game piece, it's a list of blocks.
-	Tile []Block
+	Tile []block
 
 	// Tiles is a set of tiles.
 	Tiles []Tile
@@ -128,11 +128,11 @@ func (c ColorTiles) Tiles(color Color) Tiles {
 
 }
 
-// TaggedTiles are used to extract examples tiles (connected components)
-type TaggedTiles map[Tag]Tile
+// taggedTiles are used to extract examples tiles (connected components)
+type taggedTiles map[tag]Tile
 
-// Colormap groups TaggedTiles by color
-func (t TaggedTiles) Colormap(b Board) ColorTiles {
+// Colormap groups taggedTiles by color
+func (t taggedTiles) Colormap(b Board) ColorTiles {
 
 	if b.Len() == 0 {
 		return nil
@@ -158,7 +158,7 @@ func (t TaggedTiles) Colormap(b Board) ColorTiles {
 }
 
 // List returns all the tiles.
-func (t TaggedTiles) List(b Board) Tiles {
+func (t taggedTiles) List(b Board) Tiles {
 
 	if b.Len() == 0 {
 		return nil
@@ -179,33 +179,33 @@ func (t TaggedTiles) List(b Board) Tiles {
 // Board tiling is done efficiently in a Hoshen–Kopelman manner:
 // 1) The board is copied into a larger buffer that supports labeling
 //    while simplifying corners and borders handling.
-// 2) a) Tags are flooded from north and west and b) conflicting ones are unified into sets.
+// 2) a) tags are flooded from north and west and b) conflicting ones are unified into sets.
 // 3) Tiles of tag sets are merged.
 // see:
 // https://en.wikipedia.org/wiki/Hoshen%E2%80%93Kopelman_algorithm
-func (t TaggedTiles) build(b Board) {
+func (t taggedTiles) build(b Board) {
 	if b.Len() == 0 {
 		return
 	}
 
 	// 1 - Copy
 	h, w := b.Dims()
-	array := make([][]Tag, h+2) // add cells all around the board: no more overflows!
-	cells := make([]Tag, (h+2)*(w+2))
+	array := make([][]tag, h+2) // add cells all around the board: no more overflows!
+	cells := make([]tag, (h+2)*(w+2))
 	for i := range array {
 		array[i], cells = cells[:w+2], cells[w+2:]
 	}
 
 	for i, row := range b {
 		for j, block := range row {
-			array[i+1][j+1] = Tag(block)
+			array[i+1][j+1] = tag(block)
 		}
 	}
 
 	t.extract(array)
 }
 
-func (t TaggedTiles) extract(array [][]Tag) {
+func (t taggedTiles) extract(array [][]tag) {
 	var h, w int
 	if h = len(array); h > 0 {
 		w = len(array[0])
@@ -240,7 +240,7 @@ func (t TaggedTiles) extract(array [][]Tag) {
 			if tile = t[array[i][j]]; len(tile) == 0 {
 				tile = make(Tile, 0, 2)
 			}
-			t[array[i][j]] = append(tile, Block{i - 1, j - 1})
+			t[array[i][j]] = append(tile, block{i - 1, j - 1})
 		}
 	}
 

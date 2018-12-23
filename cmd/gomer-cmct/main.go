@@ -75,7 +75,7 @@ func main() {
 	writeln(writer, b.String())
 	flush(writer)
 
-	{ // Everything has been taken care of, this is the core code:
+	{ // Init has been taken care of, this is the core code:
 		gs := mcs.GameState(b)
 
 		policies := []mcs.GamePolicy{

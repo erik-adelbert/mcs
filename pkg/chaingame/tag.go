@@ -4,42 +4,42 @@
 
 package chaingame
 
-// A Tag is composed of an ID and a color. It's used when tiling
+// A tag is composed of an ID and a color. It's used when tiling
 // boards. It uniquely identifies blocks of a same group.
-type Tag int
+type tag int
 
 // NewTag returns an encoded tag.
-func NewTag(id int, c Color) Tag {
-	return Tag((id << 4) | int(c))
+func NewTag(id int, c Color) tag {
+	return tag((id << 4) | int(c))
 }
 
 // Color decodes the color from a tag.
-func (t Tag) Color() Color {
+func (t tag) Color() Color {
 	return Color(int(t) & 0xf)
 }
 
 // ID decodes the unique ID of a tag.
-func (t Tag) ID() int {
+func (t tag) ID() int {
 	return int(t) >> 4
 }
 
-// Tags is a collection of unique tags.
-type Tags map[Tag]Tag
+// tags is a collection of unique tags.
+type tags map[tag]tag
 
 // NewTags returns a newly allocated tag collector.
-func NewTags(cap int) Tags {
-	return make(Tags, cap)
+func NewTags(cap int) tags {
+	return make(tags, cap)
 }
 
 // List all tags.
-func (t Tags) List() Tags {
+func (t tags) List() tags {
 	delete(t, 0) // Remove id facility
 	return t
 }
 
 // NewID returns a unique incrementing ID.
-// There's no Tags #0: Tags[0] stores the current set number.
-func (t Tags) NewID(c Color) Tag {
+// There's no tags #0: tags[0] stores the current set number.
+func (t tags) NewID(c Color) tag {
 	id := t[0] + 1
 	t[0] = id
 
@@ -48,7 +48,7 @@ func (t Tags) NewID(c Color) Tag {
 
 // Find implements union-find with path splitting. It's used during board
 // tiling (labeling) in support of an Hoshen–Kopelman like algorithm.
-func (t Tags) Find(x Tag) Tag {
+func (t tags) Find(x tag) tag {
 
 	for t[x] != x {
 		x, t[x] = t[x], t[t[x]] // path splitting
@@ -59,7 +59,7 @@ func (t Tags) Find(x Tag) Tag {
 
 // Union implements union-find. It's used during board tiling (labeling) in
 // support of an Hoshen–Kopelman like algorithm.
-func (t Tags) Union(x, y Tag) Tag {
+func (t tags) Union(x, y tag) tag {
 
 	if _, ok := t[x]; !ok {
 		t[x] = x
@@ -69,7 +69,7 @@ func (t Tags) Union(x, y Tag) Tag {
 		t[y] = y
 	}
 
-	order := func(x, y Tag) (Tag, Tag) {
+	order := func(x, y tag) (tag, tag) {
 		if x < y {
 			return x, y
 		}

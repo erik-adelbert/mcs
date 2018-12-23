@@ -9,19 +9,19 @@ package mcs
 
 import "sort"
 
-// Value is a "less" function that defines nodes order by their UCB values.
-var Value = func(n1, n2 **Node) bool { // Sort by value
-	return (*n1).Value() < (*n2).Value()
-}
-
-// By is the type of a "less" function that defines the ordering of nodes
+// by is the type of a "less" function that defines the ordering of nodes
 // in a Monte-Carlo tree.
-type By func(n1, n2 **Node) bool
+type by func(n1, n2 **Node) bool
 
-// SortDescending sorts nodes in reverse order.
-func (by By) SortDescending(nodes []*Node) {
+// sortDescending sorts nodes in reverse order.
+func (by by) sortDescending(nodes []*Node) {
 	ns := &nodeSorter{nodes: nodes, by: by}
 	sort.Sort(sort.Reverse(ns))
+}
+
+// value is a "less" function that defines nodes order by their UCB values.
+var value = func(n1, n2 **Node) bool { // Sort by value
+	return (*n1).Value() < (*n2).Value()
 }
 
 type nodeSorter struct {

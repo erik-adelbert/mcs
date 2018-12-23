@@ -73,7 +73,7 @@ func (b Board) Clone() Board {
 
 // ColorTiles lists tiles grouped by colors.
 func (b Board) ColorTiles() ColorTiles {
-	tiles := make(TaggedTiles, b.Len())
+	tiles := make(taggedTiles, b.Len())
 	return tiles.Colormap(b)
 }
 
@@ -149,7 +149,7 @@ func (b Board) Randomize(list ...Color) {
 
 // Tiles returns a list of all game pieces.
 func (b Board) Tiles() Tiles {
-	tiles := make(TaggedTiles, b.Len())
+	tiles := make(taggedTiles, b.Len())
 	return tiles.List(b)
 }
 
