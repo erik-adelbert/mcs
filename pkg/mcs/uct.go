@@ -67,18 +67,13 @@ func ConfidentSearch(root *Node, policies []GamePolicy, duration time.Duration) 
 				score += move.Score()
 			}
 
-			if !node.IsSolved() {
-				clone := node.State().Clone()
+			clone := node.State().Clone()
+			sampled := clone.Sample(done, policies[0])
 
-				sampled := clone.Sample(done, policies[0])
+			sampled.moves = moves.Join(sampled.moves)
+			sampled.score += score
 
-				sampled.score += score
-				sampled.moves = moves.Join(sampled.moves)
-
-				node.UpdateTree(sampled)
-			} else {
-				node.UpdateTree(node.best)
-			}
+			node.UpdateTree(sampled)
 		}
 	}
 }
