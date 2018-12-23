@@ -213,7 +213,7 @@ func (t taggedTiles) extract(array [][]tag) {
 
 	// 2a - Flooding
 	// Finding tiles (ie. tagging disjoint sets).
-	tags := NewTags(1 + h*w/8)
+	tags := newTags(1 + h*w/8)
 	for i := 1; i < h-1; i++ {
 		for j := 1; j < w-1; j++ {
 			color := array[i][j].Color()

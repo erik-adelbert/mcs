@@ -8,8 +8,8 @@ package chaingame
 // boards. It uniquely identifies blocks of a same group.
 type tag int
 
-// NewTag returns an encoded tag.
-func NewTag(id int, c Color) tag {
+// newTag returns an encoded tag.
+func newTag(id int, c Color) tag {
 	return tag((id << 4) | int(c))
 }
 
@@ -26,8 +26,8 @@ func (t tag) ID() int {
 // tags is a collection of unique tags.
 type tags map[tag]tag
 
-// NewTags returns a newly allocated tag collector.
-func NewTags(cap int) tags {
+// newTags returns a newly allocated tag collector.
+func newTags(cap int) tags {
 	return make(tags, cap)
 }
 
@@ -43,7 +43,7 @@ func (t tags) NewID(c Color) tag {
 	id := t[0] + 1
 	t[0] = id
 
-	return NewTag(int(id), c)
+	return newTag(int(id), c)
 }
 
 // Find implements union-find with path splitting. It's used during board
