@@ -7,7 +7,7 @@ package samegame
 import (
 	"strings"
 
-	"mcs/pkg/game"
+	"mcs/pkg/chaingame"
 )
 
 // SameBoard maintains an histogram alongside a  board. It's a convenience type which only

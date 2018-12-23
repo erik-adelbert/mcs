@@ -5,7 +5,7 @@
 package clickgame
 
 import (
-	"mcs/pkg/game"
+	"mcs/pkg/chaingame"
 )
 
 // A Hand stores legal moves.

@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"mcs/games/samegame"
-	"mcs/pkg/game"
+	"mcs/pkg/chaingame"
 	"mcs/pkg/mcs"
 )
 

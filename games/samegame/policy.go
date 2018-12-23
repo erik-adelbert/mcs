@@ -5,7 +5,7 @@
 package samegame
 
 import (
-	"mcs/pkg/game"
+	"mcs/pkg/chaingame"
 )
 
 // Mode indicates how the policy is to be used.

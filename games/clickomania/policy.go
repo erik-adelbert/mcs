@@ -4,7 +4,7 @@
 
 package clickgame
 
-import "mcs/pkg/game"
+import "mcs/pkg/chaingame"
 
 // Mode indicates how the policy is to be used.
 type Mode int
