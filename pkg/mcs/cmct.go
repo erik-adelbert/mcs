@@ -42,13 +42,12 @@ type job struct {
 // high scores are on http://www.js-games.de/eng/highscores/samegame/lx (results registered as cmct)
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.159.4373&rep=rep1&type=pdf
 func ConcurrentSearch(root *Node, policies []GamePolicy, duration time.Duration) Decision {
-
 	if root == nil {
 		// TODO: error handling
 		panic("no root")
 	}
 
-	// All possible moves are expanded as first move
+	// All possible first moves are expanded.
 	tree := GrowTree(root)
 
 	done := make(chan struct{})

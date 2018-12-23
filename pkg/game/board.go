@@ -173,6 +173,7 @@ func shrink(b Board) Board {
 //	2) a transposed matrix is built with no deleted block nor empty column;
 //	3) this matrix is transposed back with no empty rows.
 // This emulates perfectly the physics of clickomania.
+// Memory allocations are waste free.
 func (b Board) Remove(t Tile) Board {
 	h, w := b.Dims()
 
@@ -186,6 +187,7 @@ func (b Board) Remove(t Tile) Board {
 	}
 
 	// 2 - Deleted blocks and empty columns are removed while transposing.
+	// (well, sort of: mirroring also occurs but who cares?).
 	trans := shrink(NewBoard(w, h))
 	for last, j := 0, 0; j < w; j++ {
 		trans = trans[:last+1] // Expand by one row
@@ -213,6 +215,7 @@ func (b Board) Remove(t Tile) Board {
 	}
 
 	// 3 - Transpose back while deleting empty rows
+	// (well, who cared?)
 	w, h = trans.Dims()
 
 	b = shrink(b) // Reuse already allocated storage

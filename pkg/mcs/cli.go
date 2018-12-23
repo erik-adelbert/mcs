@@ -167,7 +167,6 @@ func (c cmd) Down() {
 }
 
 func (c cmd) Dump(fields ...string) {
-
 	if len(fields) == 0 {
 		fmt.Println(node)
 		return

@@ -162,7 +162,6 @@ func CloneRoot(root *Node) *Node {
 
 // GrowTree expands a root node in order to bootstrap a search.
 func GrowTree(root *Node) *Node {
-
 	if root == nil || root.hand.Len() == 0 {
 		// TODO: error  handling
 		panic("no moves")
@@ -211,7 +210,6 @@ func NewRoot(initial GameState, ε, c, w float64) *Node {
 
 // Best returns the best sequence found so far.
 func (n *Node) Best() Decision {
-
 	n.Lock()
 	defer n.Unlock()
 	{
@@ -238,13 +236,12 @@ func (n *Node) Down() []*Node {
 // It chooses a random node with probability ε and uses UCB with probability 1-ε
 // see https://arxiv.org/pdf/1402.6028.pdf
 func (n *Node) Downselect() *Node {
-
 	p := 1.0
 	if v := n.Visits(); v > 0 {
-		p = n.ε
+		p = n.ε // ε-greedy
 
-		// anti ε-greedy, entropy reduction by logarithmic rise: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21
-		// tests are disappointing but the idea isn't bad
+		// entropy logarithmic increase: p(0) = 0, p(1000)= 0.07, p(10000) = 0.21.
+		// tests are disappointing but the idea isn't dead.
 		// p = (1 - 1/math.Log(10+(v/200))) / 2
 	}
 
@@ -252,9 +249,9 @@ func (n *Node) Downselect() *Node {
 
 	n.Lock()
 	{
-		if rand.Float64() > p { // ε-greedy
+		if rand.Float64() > p { // selection by value
 			By(Value).SortDescending(n.down)
-		} else {
+		} else { // ε-greedy
 			swap := func(i, j int) { n.down[i], n.down[j] = n.down[j], n.down[i] }
 			rand.Shuffle(len(n.down), swap)
 		}
@@ -265,19 +262,22 @@ func (n *Node) Downselect() *Node {
 				status := node.status
 				node.Unlock()
 				if status == idle {
-					// next time, if possible, choose another one :
-					// status will eventually be reset by updater
+					// Resetting node's value is expected to exclude it from next selection.
+					// Eventually, the value will be set again by an updater.
 					n.value = math.Inf(-1)
-					goto found
+					goto undersampling
 				}
 			}
 		}
-		// not found:
+		// oversampling:
+		// - feels like it could escape from local optimums here.
+		// - feels like a prover stage could be plugged-in here.
 		node = n.down[rand.Intn(len(n.down))]
 		n.ε *= 2
-		log.Printf("downselect: no idle node available, randomly chosen %p over %d and reduced entropy\n", node, len(n.down))
+		log.Printf("downselect: oversampling %p over %d, increased entropy %g\n", node, len(n.down), n.ε)
 
-	found: // do nothing more
+	undersampling:
+		// very core idea of Monte-Carlo tree: it's desirable to undersample, hopefully, with some sense.
 	}
 	n.Unlock()
 
@@ -288,7 +288,6 @@ func (n *Node) Downselect() *Node {
 
 // Edge returns the move which leads to the calling node.
 func (n *Node) Edge() Move {
-
 	if n == nil {
 		return nil
 	}
@@ -314,7 +313,6 @@ func (n *Node) Evaluate() float64 {
 
 // ExpandOne creates and links a new children to the calling node.
 func (n *Node) ExpandOne(move Move) *Node {
-
 	state := n.State().Clone().Play(move)
 	moves := state.Moves()
 
@@ -334,7 +332,6 @@ func (n *Node) ExpandOne(move Move) *Node {
 // ExpandAll creates and links children for every legal move from
 // the position of the calling node.
 func (n *Node) ExpandAll(value float64) {
-
 	for _, move := range n.Hand().List() {
 		node := n.ExpandOne(move)
 		node.SetValue(value)
@@ -345,12 +342,10 @@ func (n *Node) ExpandAll(value float64) {
 		n.hand = MoveSet{}
 	}
 	n.Unlock()
-
 }
 
 // Hand lists all the legal moves for the calling node.
 func (n *Node) Hand() MoveSet {
-
 	n.Lock()
 	defer n.Unlock()
 	{
@@ -416,7 +411,6 @@ func (n *Node) IsTerminal() bool {
 
 // Mean is the running mean score of the calling node.
 func (n *Node) Mean() float64 {
-
 	n.Lock()
 	defer n.Unlock()
 	{
@@ -426,7 +420,6 @@ func (n *Node) Mean() float64 {
 
 // RandomNewEdge removes and return a move from the calling node's hand.
 func (n *Node) RandomNewEdge() (move Move) {
-
 	n.Lock()
 	{
 		move, n.hand = n.hand.Draw()
@@ -465,13 +458,11 @@ func (n *Node) SetValue(value float64) {
 
 // State returns the position associated to the calling node.
 func (n *Node) State() GameState {
-
 	return n.state
 }
 
 // Status is a safe getter.
 func (n *Node) Status() NodeStatus {
-
 	if n == nil {
 		return null
 	}
@@ -485,7 +476,6 @@ func (n *Node) Status() NodeStatus {
 
 // StDev is a safe running standard deviation.
 func (n *Node) StDev() float64 {
-
 	return math.Sqrt(n.Variance())
 }
 
@@ -563,7 +553,6 @@ func (n *Node) String() string {
 
 // UCB calls the package wide enabled UCB formula.
 func (n *Node) UCB() float64 {
-
 	return SelectedUCB(n)
 }
 
@@ -578,8 +567,6 @@ func (n *Node) Up() *Node {
 // mean and variance with a numerically stable technique. Finally it computes
 // UCB values enabling next search iteration to select the most promising node.
 func (n *Node) UpdateTree(decision Decision) {
-
-	//if n != nil && !n.IsSolved() {
 	if n != nil {
 		n.Lock()
 		{
@@ -619,7 +606,6 @@ func (n *Node) UpdateTree(decision Decision) {
 
 // Value returns the calling node's search score.
 func (n *Node) Value() float64 {
-
 	n.Lock()
 	defer n.Unlock()
 	{
@@ -629,7 +615,6 @@ func (n *Node) Value() float64 {
 
 // Variance maintains a running variance for the calling node.
 func (n *Node) Variance() float64 {
-
 	n.Lock()
 	defer n.Unlock()
 	{
