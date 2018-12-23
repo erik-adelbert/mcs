@@ -22,19 +22,19 @@ const (
 )
 
 // ColorPolicy is used for selecting nodes and moves during playouts.
-type ColorPolicy func(SameBoard) (game.Color, Mode)
+type ColorPolicy func(SameBoard) (chaingame.Color, Mode)
 
 // NoTaboo deactivate taboo selection.
-func NoTaboo(board SameBoard) (game.Color, Mode) {
+func NoTaboo(board SameBoard) (chaingame.Color, Mode) {
 	_ = board
-	return game.NoColor, PerSampling
+	return chaingame.NoColor, PerSampling
 }
 
 // TabooColor returns a color ot to be played unless it is the only available move.
-func TabooColor(board SameBoard) (game.Color, Mode) {
+func TabooColor(board SameBoard) (chaingame.Color, Mode) {
 
-	taboo, max := game.NoColor, 0.0
-	for c, n := range board.Histogram() {
+	taboo, max := chaingame.NoColor, 0.0
+	for c, n := range board.Histogram {
 		if n > max {
 			taboo, max = c, n
 		}

@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // game can be used to represent board games like clickomania or samegame.
-package game
+package chaingame

@@ -9,25 +9,25 @@ import (
 )
 
 // A Hand stores legal moves.
-type Hand game.ColorTiles
+type Hand chaingame.ColorTiles
 
 // Draw randomly removes a move from the hand.
 func (h Hand) Draw() (Move, Hand) {
-	tiles := game.ColorTiles(h)
-	tile := tiles.PickTile(game.NoColor)
+	tiles := chaingame.ColorTiles(h)
+	tile := tiles.PickTile(chaingame.NoColor)
 
 	return Move(tile), Hand(tiles)
 }
 
 // Len returns the number of available legal moves.
 func (h Hand) Len() int {
-	return game.ColorTiles(h).Len(game.AllColors)
+	return chaingame.ColorTiles(h).Len(chaingame.AllColors)
 }
 
 // List returns a list containing all legal moves.
 func (h Hand) List() []Move {
 	moves := make([]Move, 0, h.Len())
-	tiles := game.ColorTiles(h).Tiles(game.AllColors)
+	tiles := chaingame.ColorTiles(h).Tiles(chaingame.AllColors)
 
 	for _, tile := range tiles {
 		moves = append(moves, Move(tile))
@@ -37,11 +37,11 @@ func (h Hand) List() []Move {
 }
 
 // A Move is a tile that can be removed from a board.
-type Move game.Tile
+type Move chaingame.Tile
 
 // Len returns the number of blocks of the calling tile.
 func (m Move) Len() int {
-	return len(game.Tile(m))
+	return len(chaingame.Tile(m))
 }
 
 // Score computes the samegame score of a move.
@@ -50,7 +50,7 @@ func (m Move) Score() float64 {
 }
 
 func (m Move) String() string {
-	return game.Tile(m).String()
+	return chaingame.Tile(m).String()
 }
 
 // A Sequence of moves is a FIFO structure.
@@ -102,7 +102,7 @@ func (sg State) Moves() Hand {
 
 // Play returns the state following a ply.
 func (sg State) Play(m Move) State {
-	return State(ClickBoard(sg).Remove(game.Tile(m)))
+	return State(ClickBoard(sg).Remove(chaingame.Tile(m)))
 }
 
 // Sample simulates a game to its end by applying a move selection policy. The policy usually
@@ -112,7 +112,7 @@ func (sg State) Sample(done <-chan struct{}, p ColorPolicy) (float64, Sequence) 
 	board := ClickBoard(sg)
 	tiles := board.ColorTiles()
 
-	taboo := game.NoColor
+	taboo := chaingame.NoColor
 	if c, mode := p(board); mode == PerSampling {
 		taboo = c
 	}
@@ -147,7 +147,7 @@ func (sg State) Score() float64 {
 	dim := float64(ClickBoard(sg).Cap())
 
 	penalty := 0.0
-	for _, n := range ClickBoard(sg).h {
+	for _, n := range ClickBoard(sg).Histogram {
 		penalty += n
 	}
 	penalty = penalty / dim

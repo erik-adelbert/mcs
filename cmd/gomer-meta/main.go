@@ -127,8 +127,8 @@ func load(fname *string) (h, w int, board []string) {
 func replay(writer *bufio.Writer, b samegame.SameBoard, solution mcs.Decision) {
 	moves := solution.Moves()
 	for i, tile := range moves {
-		color := b.TileColor(game.Tile(tile))
-		b = b.Remove(game.Tile(tile))
+		color := b.TileColor(chaingame.Tile(tile))
+		b = b.Remove(chaingame.Tile(tile))
 
 		writeln(writer, fmt.Sprintf("\n#%d Removed: %s", i+1, color.AnsiColoredString(tile.String())))
 		writeln(writer, b.String())

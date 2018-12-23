@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package game
+package chaingame
 
 // A Tag is composed of an ID and a color. It's used when tiling
 // boards. It uniquely identifies blocks of a same group.

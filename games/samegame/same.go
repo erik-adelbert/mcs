@@ -14,67 +14,37 @@ import (
 // purpose is performance. By incrementally computing histograms of boards in inner loops,
 // it provides more time for problem solving.
 type SameBoard struct {
-	b game.Board
-	h game.Histogram
+	chaingame.Board
+	chaingame.Histogram
 }
 
 // NewSameBoard returns an initialized 0-value ClickBoard.
 // Storage is allocated but board is empty.
 func NewSameBoard(h, w int) SameBoard {
-	board := game.NewBoard(h, w)
-	histo := make(game.Histogram, int(game.AllColors))
+	board := chaingame.NewBoard(h, w)
+	histo := make(chaingame.Histogram, int(chaingame.AllColors))
 
 	return SameBoard{board, histo}
-}
-
-// Cap returns the maximum number of blocks a board can have.
-func (sb SameBoard) Cap() int {
-	return sb.b.Cap()
-}
-
-// Caps returns the maximum lines and columns a board can have.
-func (sb SameBoard) Caps() (int, int) {
-	return sb.b.Caps()
 }
 
 // Clone returns an independent copy of a board.
 func (sb SameBoard) Clone() SameBoard {
-	histo := make(game.Histogram, int(game.AllColors))
-	for k, v := range sb.h {
+	histo := make(chaingame.Histogram, int(chaingame.AllColors))
+	for k, v := range sb.Histogram {
 		histo[k] = v
 	}
 
-	board := sb.b.Clone()
+	board := sb.Board.Clone()
 
 	return SameBoard{board, histo}
 }
 
-// ColorTiles extract and lists all tiles of the calling board grouped by color.
-func (sb SameBoard) ColorTiles() game.ColorTiles {
-	return sb.b.ColorTiles()
-}
-
-// Dims returns the current size of a board.
-func (sb SameBoard) Dims() (int, int) {
-	return sb.b.Dims()
-}
-
-// Histogram is returned in Θ(1). This is a desired behaviour for this object.
-func (sb SameBoard) Histogram() game.Histogram {
-	return sb.h
-}
-
-// Len is the underlying board's len
-func (sb SameBoard) Len() int {
-	return sb.b.Len()
-}
-
 // Load a SameBoard from strings and initializes its histogram.
 func (sb SameBoard) Load(buf []string) {
-	sb.b.Load(buf)
+	sb.Board.Load(buf)
 
-	for k, v := range sb.b.Histogram() {
-		sb.h[k] = v
+	for k, v := range sb.Board.Histogram() {
+		sb.Histogram[k] = v
 	}
 }
 
@@ -84,29 +54,29 @@ func (sb SameBoard) Load(buf []string) {
 //  - a one color list produces a board filled with a unique tile.
 //
 // c.Randomize(AllColors, Red, Indigo)
-func (sb SameBoard) Randomize(list ...game.Color) {
-	sb.b.Randomize(list...)
+func (sb SameBoard) Randomize(list ...chaingame.Color) {
+	sb.Board.Randomize(list...)
 
-	for k, v := range sb.b.Histogram() {
-		sb.h[k] = v
+	for k, v := range sb.Board.Histogram() {
+		sb.Histogram[k] = v
 	}
 }
 
 // Remove a tile from the board. The resulting histogram is built in Θ(m)
 // with m < 7, the number of colors initially present on the board.
 // This is a desired behaviour for this object.
-func (sb SameBoard) Remove(t game.Tile) SameBoard {
+func (sb SameBoard) Remove(t chaingame.Tile) SameBoard {
 	color := sb.TileColor(t)
 
-	n := sb.h[color]
+	n := sb.Histogram[color]
 
 	if n = n - float64(len(t)); n == 0 {
-		delete(sb.h, color)
+		delete(sb.Histogram, color)
 	} else {
-		sb.h[color] = n
+		sb.Histogram[color] = n
 	}
 
-	sb.b = sb.b.Remove(t)
+	sb.Board = sb.Board.Remove(t)
 
 	return sb
 }
@@ -116,25 +86,20 @@ func (sb SameBoard) Remove(t game.Tile) SameBoard {
 func (sb SameBoard) String() string {
 	var s strings.Builder
 
-	s.WriteString(sb.b.String())
+	s.WriteString(sb.Board.String())
 	s.WriteByte('\n')
-	s.WriteString(sb.h.String())
+	s.WriteString(sb.Histogram.String())
 
 	return s.String()
 }
 
 // TileColor returns the color of a given tile.
-func (sb SameBoard) TileColor(t game.Tile) game.Color {
+func (sb SameBoard) TileColor(t chaingame.Tile) chaingame.Color {
 	// The color of a tile is the color of its first block
 	if len(t) == 0 {
-		return game.NoColor
+		return chaingame.NoColor
 	}
 
 	block := t[0]
-	return sb.b[block.Row()][block.Column()]
-}
-
-// Tiles extract and lists all tiles.
-func (sb SameBoard) Tiles() game.Tiles {
-	return sb.b.Tiles()
+	return sb.Board[block.Row()][block.Column()]
 }
